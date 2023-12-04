@@ -22,7 +22,7 @@ from ro36_interfaces.action import Move
 from rclpy.action import CancelResponse, GoalResponse
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.executors import MultiThreadedExecutor
-from ro36_simple_mover_server.simple_robot_mover import SimpleRobotMover
+from ro36_simple_mover_server.simple_robot_mover import SimpleRobotMover #vllt noch ändern
 
 class MoveServer(Node):
 

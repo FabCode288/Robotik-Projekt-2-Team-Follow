@@ -33,7 +33,7 @@ class MoveServer(Node):
         self._last_pose_roll = 0
         self._last_pose_pitch = 0
         self._last_pose_theta = 0
-
+        #benötigt sub für RFID
         self.odom_sub = self.create_subscription(
             Odometry,
             'odom',
@@ -116,8 +116,8 @@ class MoveServer(Node):
         else:
             return None
 
-    def _rfid_reached(self, goal_handle):
-        return goal_handle.rfid_reached()
+    def _rfid_reached(self):    #muss noch machen, kriegt wahrscheinlich msg von rfid sub
+        return false
 
     def _publish_calculated_feedback(self, goal_handle, vel):
         feedback_msg = Move.Feedback()

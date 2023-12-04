@@ -78,7 +78,7 @@ class MoveServer(Node):
         #self.get_logger().info('Received odom_callback.')
     def _rfid_callback(self,msg):
         self._last_rfid_data = msg.data      
-            
+        #self.get_logger().info('Received rfid_callback.')    
 
 
     def _goal_callback(self, goal_request):

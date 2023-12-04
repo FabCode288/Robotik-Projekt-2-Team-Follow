@@ -155,9 +155,9 @@ class MoveServer(Node):
 def main():
     rclpy.init()
     try:
-        robot_mover_executor = MultiThreadedExecutor(2)
-        simple_mover_server = SimpleRobotMoverServer()
-        rclpy.spin(node=simple_mover_server, executor=robot_mover_executor)
+        robot_mover_executor = MultiThreadedExecutor(3)
+        move_server = MoveServer()
+        rclpy.spin(node=move_server, executor=robot_mover_executor)
     finally:
         simple_mover_server.destroy_node()
         rclpy.shutdown()

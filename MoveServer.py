@@ -125,7 +125,7 @@ class MoveServer(Node):
         goal_handle.publish_feedback(feedback_msg)
 
     def _determine_action_result(self, goal_handle):
-        result = GoTo.Result()
+        result = Move.Result()
         if goal_handle.is_active and self._rfid_reached:
             self.get_logger().info('Move succeeded')
             goal_handle.succeed()

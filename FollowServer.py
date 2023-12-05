@@ -33,6 +33,7 @@ class FollowServer(Node):
         self._last_pose_roll = 0
         self._last_pose_pitch = 0
         self._last_pose_theta = 0
+        
 
         #sub camera
 
@@ -92,11 +93,12 @@ class FollowServer(Node):
 
     def _execute_callback(self, goal_handle):
         self.get_logger().info('Executing follow')
-        mover = SimpleRobotMover()
+        mover = SimpleRobotMover(goal_handle.request.distance, goal_handle.request.v, goal_handle.omega)
         #mover.set_target_pose(goal_handle.request.pose.x, goal_handle.request.pose.y, goal_handle.request.pose.theta)
         vel = mover.follow(self, _last_pose_pitch, _last_pose_roll) #zu übergebende vars tbd
         self.get_logger().info("Velocity1: {}, {}".format(vel[0], vel[1])) #zu distance ändern
-        while(goal_handle.is_active and not goal_handle.is_cancel_requested and vel is not None):
+        while(goal_handle.is_active and not goal_handle.is_cancel_requested and vel is not None):#and leerbilder<5oder so
+            #leerbilder zählen
             vel = mover.follow(self, _last_pose_pitch, _last_pose_roll) 
             self._publish_velocity(vel)
             self._publish_calculated_feedback(goal_handle)

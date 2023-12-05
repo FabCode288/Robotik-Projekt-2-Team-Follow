@@ -129,9 +129,11 @@ class SimpleRobotMoverClient(Node):
 
 def main(args=None):
     rclpy.init(args=args) 
-    while(true):#solange result succeded
+    while(true):
         self.action_client = self.action_loop()
         self.future = self.future_loop()
-        rclpy.spin_until_future_complete(action_client, future)    
+        rclpy.spin_until_future_complete(action_client, future)
+        if(self.future.result().result.sequence is not succeded):
+          break
 if __name__ == '__main__':
     main()

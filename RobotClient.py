@@ -9,7 +9,9 @@ from ro36_interfaces.action import Turn
 class SimpleRobotMoverClient(Node):
 
     def __init__(self, type):
-        self.type = type 
+        self.type=type
+        self.target_velocity= 0.1
+        self.target_distance= 0.1
         super().__init__('pipe_client')
         try:
             if(type=="move"):
@@ -57,32 +59,33 @@ class SimpleRobotMoverClient(Node):
     def robot_detected():
         pass
 
-    def send_goal_move(self, target_velocity):
+    def send_goal_move(self):
 
         goal_msg = Move.Goal()
-        goal_msg.float32 = target_velocity
+        goal_msg.float32 = self.target_velocity
 
         self._action_client_move.wait_for_server()
         self._send_goal_future = self._action_client_move.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
         self._send_goal_future.add_done_callback(self.goal_response_callback)
     
-    def send_goal_follow(self, target_distance):
+    def send_goal_follow(self):
 
         goal_msg = Follow.Goal()
-        goal_msg.float32 = target_velocity
+        goal_msg.float32 = self.target_distance
 
         self._action_client_follow.wait_for_server()
         self._send_goal_future = self._action_client_follow.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
         self._send_goal_future.add_done_callback(self.goal_response_callback)
     
-    def send_goal_turn(self, target_velocity):
+    def send_goal_turn(self):
 
         goal_msg = Turn.Goal()
-        goal_msg.float32 = target_velocity
+        goal_msg.float32 = self.target_velocity/2
 
         self._action_client_turn.wait_for_server()
         self._send_goal_future = self._action_client_turn.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
         self._send_goal_future.add_done_callback(self.goal_response_callback)
+    
 
 
     def goal_response_callback(self, future):
@@ -104,22 +107,31 @@ class SimpleRobotMoverClient(Node):
     def feedback_callback(self, feedback_msg):
         feedback = feedback_msg.feedback
         self.get_logger().info('Received feedback: {0}'.format(feedback.partial_sequence))
+    def action_loop(self):
+        if(self.robot_detected()):
+            action_client = SimpleRobotMoverClient("follow")            
+        elif(self._rfid_reached()):
+            action_client = SimpleRobotMoverClient("turn")            
+        else:
+            action_client = SimpleRobotMoverClient("move")            
+        return action_client
+    def future_loop(self):
+        try:
+            if(self.type=="move"):
+                future = action_client.send_goal_move(10)
+            elif(self.tyoe=="turn"):
+                future = action_client.send_goal_turn(10)
+            elif(self.type=="follow"):
+                future = action_client.send_goal_follow(10)
+            return future    
+        except:
+            pass
 
 def main(args=None):
-    rclpy.init(args=args)
-
-    if(self.robot_detected()):
-        action_client = SimpleRobotMoverClient("follow")
-        future = action_client.send_goal_follow(10)
-    elif(self._rfid_reached()):
-        action_client = SimpleRobotMoverClient("turn")
-        future = action_client.send_goal_turn(10)
-    else:
-        action_client = SimpleRobotMoverClient("move")
-        future = action_client.send_goal_move(10)
-
-    rclpy.spin_until_future_complete(action_client, future)
-
-
+    rclpy.init(args=args) 
+    while(true):#solange result succeded
+        self.action_client = self.action_loop()
+        self.future = self.future_loop()
+        rclpy.spin_until_future_complete(action_client, future)    
 if __name__ == '__main__':
     main()

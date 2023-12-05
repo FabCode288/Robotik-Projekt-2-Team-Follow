@@ -3,11 +3,11 @@ import math
 
 class RobotTurn():
     def __init__(self, start_angle, default_omega):
-        self.end_angle= start_angle+2*np.pi
-        self.default_omega =default_omega
+        self.end_angle = start_angle + np.pi
+        self.default_omega = default_omega
 
     def turn(self, current_angle):
-        if current_angle <self.end_angle:
+        if current_angle < self.end_angle:
             return [0, self.default_omega]
         else:
             return [0,0]

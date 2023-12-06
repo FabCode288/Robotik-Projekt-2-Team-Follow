@@ -33,10 +33,10 @@ class MoveServer(Node):
         self._last_pose_roll = 0
         self._last_pose_pitch = 0
         self._last_pose_theta = 0
-        self._last_rfid_data = "0"
+        self._last_rfid_tag = "0"
         self._current_rfid_data = "0"
         #datatyp and topic of rfid unclear
-        self._rfid_sub = self.create_subscription(
+        self.rfid_sub = self.create_subscription(
             String,
             'rfid_topic',
             self._rfid_callback,
@@ -45,6 +45,11 @@ class MoveServer(Node):
             Odometry,
             'odom',
             self._odom_callback,
+            10)
+         self.camera_sub = self.create_subscription(
+            Bool,float32
+            'camera_topic',
+            self._camera_callback,
             10)
 
         self._cmd_pub = self.create_publisher(Twist, 'cmd_vel', 10)
@@ -78,6 +83,14 @@ class MoveServer(Node):
         )
         #self.get_logger().info('Received odom_callback.')
     def _rfid_callback(self,msg):
+        
+        self._current_rfid_data = msg.data  
+        if (msg.data is  not "0"):
+            self._last_rfid_tag = msg.data
+        else:
+            pass
+        #self.get_logger().info('Received rfid_callback.')    
+    def _camera_callback(self,msg1,msg2):
         self._last_rfid_data = self._current_rfid_data
         self._current_rfid_data = msg.data      
         #self.get_logger().info('Received rfid_callback.')    
@@ -128,7 +141,7 @@ class MoveServer(Node):
             return None
 
     def _rfid_changed(self):   
-        if (self._last_rfid_data == self._current_rfid_data): 
+        if (sef._current_rfid_data is not "0" and self._last_rfid_data == self._current_rfid_data ): 
             return False
         else:
             return True

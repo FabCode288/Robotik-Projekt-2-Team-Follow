@@ -1,5 +1,6 @@
 import rclpy
 import string
+import time
 from rclpy.action import ActionClient
 from rclpy.node import Node
 
@@ -105,14 +106,22 @@ class SimpleRobotMoverClient(Node):
         feedback = feedback_msg.feedback
         self.get_logger().info('Received feedback: {0}'.format(feedback.partial_sequence))
 
-
 def main(args=None):
     rclpy.init(args=args) 
     client_logic = ClientLogic()
-    while():
-        action_client = SimpleRobotMoverClient()
-        #Hier State Machine die entscheidet welcher action_client senden muss
-        #Dann auch error State möglich
+    client_node = SimpleRobotMoverClient()
+    while():        
+         match client_logic.get_next_move_order(client_node.last_result):
+            case None:
+                break
+            case "turn":
+                client_node._action_client_turn.send_goal_turn()
+            case "move":
+                cient_node._action_client_move.send_goal_move()
+            case "follow":
+                client_node._action_client_follow.send_goal_follow()
+        time.sleep(0.1)
+        
     rclpy.shutdown()
 if __name__ == '__main__':
     main()

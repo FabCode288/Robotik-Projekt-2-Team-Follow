@@ -6,7 +6,7 @@ class ClientLogic():
     def get_next_client_order(self,result):
         try:
             match result:
-                case "Abort":
+                case "Aborted":
                     order = None
                 case "Start":
                     order = "move"

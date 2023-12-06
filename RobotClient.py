@@ -31,32 +31,32 @@ class SimpleRobotMoverClient(Node):
             Turn, 
             'turn')       
 
-        self._rfid_sub = self.create_subscription(
-            string,
-            'rfid_topic',
-            self._rfid_callback,
-            10)
-        self._camera_sub = self.create_subscription(
-            Image,
-            'camera_topic',
-            self.image_callback,
-            10)
+    #     self._rfid_sub = self.create_subscription(
+    #         string,
+    #         'rfid_topic',
+    #         self._rfid_callback,
+    #         10)
+    #     self._camera_sub = self.create_subscription(
+    #         Image,
+    #         'camera_topic',
+    #         self.image_callback,
+    #         10)
         
-    def _rfid_callback(self,msg):
-            self._last_rfid_data = msg.data      
-            #self.get_logger().info('Received rfid_callback.')  
-            #   
-    def _rfid_reached(self):   
-        if (self._last_rfid_data == 1): 
-            return True
-        else:
-            return False
+    # def _rfid_callback(self,msg):
+    #         self._last_rfid_data = msg.data      
+    #         #self.get_logger().info('Received rfid_callback.')  
+    #         #   
+    # def _rfid_reached(self):   
+    #     if (self._last_rfid_data == 1): 
+    #         return True
+    #     else:
+    #         return False
 
-    def _image_callback():
-        pass
+    # def _image_callback():
+    #     pass
 
-    def robot_detected():
-        pass
+    # def robot_detected():
+    #     pass
 
     def send_goal_move(self):
 

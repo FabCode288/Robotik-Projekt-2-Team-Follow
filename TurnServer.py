@@ -123,14 +123,16 @@ class TurnServer(Node):
         if goal_handle.is_active and self._dist_to_goal(goal_handle) <= 0:
             self.get_logger().info('Turn succeeded')
             goal_handle.succeed()
-            result.reached = True
+            result.result = "Turn_succesfull"
         elif goal_handle.is_cancel_requested:
             goal_handle.canceled()
             self.get_logger().info('Turn was canceled')
+            result.result = "Canceled"
         else:
             if goal_handle.is_active:
                 goal_handle.abort()
                 self.get_logger().info('Turn was aborted')
+                result.result = "Aborted"
         return result
 
 

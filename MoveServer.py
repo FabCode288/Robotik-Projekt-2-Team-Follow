@@ -33,8 +33,8 @@ class MoveServer(Node):
         self._last_pose_roll = 0
         self._last_pose_pitch = 0
         self._last_pose_theta = 0
-        self._last_rfid_data = 0
-        self._current_rfid_data = 0
+        self._last_rfid_data = "0"
+        self._current_rfid_data = "0"
         #datatyp and topic of rfid unclear
         self._rfid_sub = self.create_subscription(
             String,
@@ -147,10 +147,12 @@ class MoveServer(Node):
         elif goal_handle.is_cancel_requested:
             goal_handle.canceled()
             self.get_logger().info('Move was canceled')
+            result.result = "Canceled"
         else:
             if goal_handle.is_active:
                 goal_handle.abort()
                 self.get_logger().info('Move was aborted')
+                result.result = "Abort"
         return result
 
 

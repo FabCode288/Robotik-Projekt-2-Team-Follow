@@ -1,5 +1,5 @@
 float32 target_velocity
 ---
-float32 result
+String result
 ---
 geometry_msgs/Twist current_velocity

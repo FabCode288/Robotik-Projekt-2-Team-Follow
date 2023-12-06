@@ -105,20 +105,10 @@ class SimpleRobotMoverClient(Node):
         feedback = feedback_msg.feedback
         self.get_logger().info('Received feedback: {0}'.format(feedback.partial_sequence))
 
-def future_loop(self, action_client):
-    try:
-        if(self.type=="move"):
-            future = action_client.send_goal_move(10)
-        elif(self.tyoe=="turn"):
-            future = action_client.send_goal_turn(10)
-        elif(self.type=="follow"):
-            future = action_client.send_goal_follow(10)
-        return future    
-    except:
-        pass    
 
 def main(args=None):
     rclpy.init(args=args) 
+    client_logic = ClientLogic()
     while():
         action_client = SimpleRobotMoverClient()
         #Hier State Machine die entscheidet welcher action_client senden muss

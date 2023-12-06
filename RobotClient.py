@@ -121,10 +121,8 @@ def main(args=None):
     rclpy.init(args=args) 
     while():
         action_client = SimpleRobotMoverClient()
-        future = future_loop(action_client)
-        rclpy.spin_until_future_complete(action_client, future)
-        if(future.result().result.sequence is not "succeded"):
-          break
+        #Hier State Machine die entscheidet welcher action_client senden muss
+        #Dann auch error State möglich
     rclpy.shutdown()
 if __name__ == '__main__':
     main()

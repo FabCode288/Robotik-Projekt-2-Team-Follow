@@ -11,3 +11,6 @@ ein knoten hat clients und die state machine
 clients leben gleichzeitig
 result = enum für state machine
 spin bis crtl c
+
+kamera
+/dev/video0

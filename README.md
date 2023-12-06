@@ -5,3 +5,6 @@ Setup -> wo genau ist der rfid
 Wer reagiert auf die kamera -> client oder server
 
 Wer/Wo schreibt Werte in result, wie Succeed oder Aborted?
+
+ein knoten hat clients und die state machine
+result = enum für state machine

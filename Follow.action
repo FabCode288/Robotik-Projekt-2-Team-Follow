@@ -1,5 +1,5 @@
 float32 target_velocity
 ---
-RobotResult result
+Int result
 ---
 geometry_msgs/Twist current_velocity

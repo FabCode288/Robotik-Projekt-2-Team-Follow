@@ -1,6 +1,5 @@
 # Robotik-Projekt-2-Team-Follow
-Was bekommen wir von der Kamera -> datentyp, topic, import    
-Was bekommen wir vom rfid -> datentyp, topic, import      
+Was bekommen wir vom rfid -> datentyp, topic, import
 Setup -> wo genau ist der rfid
 Wer reagiert auf die kamera -> client oder server
 
@@ -20,3 +19,6 @@ stream öffnen im konstruktor
 timer auf 10 Hz
 -> bild auslesen, entzerren, grauwert, marker erkennen und ggf abstand berechnen
 
+rfid:
+from mfrc522 import SimpleMFRC522
+-> docu

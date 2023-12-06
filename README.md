@@ -14,3 +14,9 @@ spin bis crtl c
 
 kamera
 /dev/video0
+
+knoten hat cv2 object
+stream öffnen im konstruktor
+timer auf 10 Hz
+-> bild auslesen, entzerren, grauwert, marker erkennen und ggf abstand berechnen
+

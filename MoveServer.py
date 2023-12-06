@@ -82,8 +82,7 @@ class MoveServer(Node):
             ]
         )
         #self.get_logger().info('Received odom_callback.')
-    def _rfid_callback(self,msg):
-        
+    def _rfid_callback(self,msg):        
         self._current_rfid_data = msg.data  
         if (msg.data is  not "0"):
             self._last_rfid_tag = msg.data
@@ -139,9 +138,10 @@ class MoveServer(Node):
             return ("Velocity: {}, {}".format(vel[0], vel[1]))
         else:
             return None
-
+    #Problem rfid könnte flimmern was bei einfacher Aenderung sofort abbricht
+    #Wie können wir überprüfen ob nicht der selbe rfid, an dem bereits gewendet wurde, zum Abbruch führt?
     def _rfid_changed(self):   
-        if (sef._current_rfid_data is not "0" and self._last_rfid_data == self._current_rfid_data ): 
+        if (self._current_rfid_data is not "0" and self._last_rfid_tag == self._current_rfid_data ): 
             return False
         else:
             return True
@@ -153,7 +153,7 @@ class MoveServer(Node):
 
     def _determine_action_result(self, goal_handle):
         result = Move.Result()
-        if goal_handle.is_active and not self._rfid_changed:
+        if goal_handle.is_active and self._rfid_changed:
             self.get_logger().info('Move succeeded')
             goal_handle.succeed()
             result.result = "RFID_reached"

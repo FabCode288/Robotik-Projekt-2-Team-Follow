@@ -5,9 +5,10 @@ import math
 
 class RobotMove:
 
-    def __init__(self, v, omega):
+    def __init__(self, v, omega,last_rfid):
         self._v = v
         self._omega = omega
+        self._last_rfid=last_rfid
 
     def get_movement_pipe(self, pitch, roll):
         try:  

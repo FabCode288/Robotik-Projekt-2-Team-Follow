@@ -34,6 +34,7 @@ class MoveServer(Node):
         self._last_pose_pitch = 0
         self._last_pose_theta = 0
         self._last_rfid_data = 0
+        self._current_rfid_data = 0
         #datatyp and topic of rfid unclear
         self._rfid_sub = self.create_subscription(
             String,
@@ -77,7 +78,8 @@ class MoveServer(Node):
         )
         #self.get_logger().info('Received odom_callback.')
     def _rfid_callback(self,msg):
-        self._last_rfid_data = msg.data      
+        self._last_rfid_data = self._current_rfid_data
+        self._current_rfid_data = msg.data      
         #self.get_logger().info('Received rfid_callback.')    
 
 
@@ -125,11 +127,11 @@ class MoveServer(Node):
         else:
             return None
 
-    def _rfid_reached(self):   
-        if (self._last_rfid_data == 1): 
-            return true
+    def _rfid_changed(self):   
+        if (self._last_rfid_data == self._current_rfid_data): 
+            return False
         else:
-            return false
+            return True
 
     def _publish_calculated_feedback(self, goal_handle, vel):
         feedback_msg = Move.Feedback()
@@ -138,10 +140,10 @@ class MoveServer(Node):
 
     def _determine_action_result(self, goal_handle):
         result = Move.Result()
-        if goal_handle.is_active and self._rfid_reached:
+        if goal_handle.is_active and not self._rfid_changed:
             self.get_logger().info('Move succeeded')
             goal_handle.succeed()
-            result.reached = True
+            result.result = "RFID_reached"
         elif goal_handle.is_cancel_requested:
             goal_handle.canceled()
             self.get_logger().info('Move was canceled')

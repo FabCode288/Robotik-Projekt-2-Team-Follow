@@ -152,7 +152,7 @@ class MoveServer(Node):
             if goal_handle.is_active:
                 goal_handle.abort()
                 self.get_logger().info('Move was aborted')
-                result.result = "Abort"
+                result.result = "Aborted"
         return result
 
 

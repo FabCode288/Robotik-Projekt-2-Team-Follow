@@ -11,29 +11,23 @@ from ro36_interfaces.action import Turn
 
 class SimpleRobotMoverClient(Node):
 
-    def __init__(self, type):
-        self.type=type
+    def __init__(self):
+        
         self.target_velocity= 0.1
         self.target_distance= 0.1
-        super().__init__('pipe_client')
-        try:
-            if(type=="move"):
-                self._action_client_move = ActionClient(
-                    self,
-                    Move, 
-                    'move')
-            elif(type=="follow"):
-                self._action_client_follow = ActionClient(
-                    self,
-                    Follow, 
-                    'follow')
-            elif(type=="turn"):
-                self._action_client_turn = ActionClient(
-                    self,
-                    Turn, 
-                    'turn')
-        except:
-            pass
+        super().__init__('pipe_client')       
+        self._action_client_move = ActionClient(
+            self,
+            Move, 
+            'move')   
+        self._action_client_follow = ActionClient(
+            self,
+            Follow, 
+            'follow')    
+        self._action_client_turn = ActionClient(
+            self,
+            Turn, 
+            'turn')       
 
         self._rfid_sub = self.create_subscription(
             string,
@@ -105,19 +99,12 @@ class SimpleRobotMoverClient(Node):
     def get_result_callback(self, future):
         result = future.result().result
         self.get_logger().info('Result: {0}'.format(result.sequence))
-        rclpy.shutdown()
+        
         
     def feedback_callback(self, feedback_msg):
         feedback = feedback_msg.feedback
         self.get_logger().info('Received feedback: {0}'.format(feedback.partial_sequence))
-def action_loop(self):
-    if(self.robot_detected()):
-        action_client = SimpleRobotMoverClient("follow")            
-    elif(self._rfid_reached()):
-        action_client = SimpleRobotMoverClient("turn")            
-    else:
-        action_client = SimpleRobotMoverClient("move")            
-    return action_client
+
 def future_loop(self, action_client):
     try:
         if(self.type=="move"):
@@ -133,10 +120,11 @@ def future_loop(self, action_client):
 def main(args=None):
     rclpy.init(args=args) 
     while():
-        action_client = action_loop()
+        action_client = SimpleRobotMoverClient()
         future = future_loop(action_client)
         rclpy.spin_until_future_complete(action_client, future)
         if(future.result().result.sequence is not "succeded"):
           break
+    rclpy.shutdown()
 if __name__ == '__main__':
     main()

@@ -47,7 +47,7 @@ class MoveServer(Node):
             self._odom_callback,
             10)
          self.camera_sub = self.create_subscription(
-            Bool,float32
+            float32
             'camera_topic',
             self._camera_callback,
             10)

@@ -84,14 +84,14 @@ class MoveServer(Node):
         #self.get_logger().info('Received odom_callback.')
     def _rfid_callback(self, msg):        
         self._current_rfid_data = msg.data 
-        self.get_logger().info('Read RFID: ' + String(msg.data))
+        self.get_logger().info('Read RFID: ' + str(msg.data))
         if (msg.data is  not "0"):
             self._last_rfid_tag = msg.data
         else:
             pass
     # def _rfid_callback(self, msg):        
     #     self._current_rfid_data = msg.data 
-    #     self.get_logger().info('Read RFID: ' + String(msg.data))
+    #     self.get_logger().info('Read RFID: ' + str(msg.data))
     #     if (_current_rfid_data != _last_rfid_tag):
     #         self.did_RFID_change = True
     #         self._last_rfid_tag = msg.data

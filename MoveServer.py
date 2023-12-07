@@ -89,6 +89,14 @@ class MoveServer(Node):
             self._last_rfid_tag = msg.data
         else:
             pass
+    # def _rfid_callback(self, msg):        
+    #     self._current_rfid_data = msg.data 
+    #     self.get_logger().info('Read RFID: ' + String(msg.data))
+    #     if (_current_rfid_data != _last_rfid_tag):
+    #         self.did_RFID_change = True
+    #         self._last_rfid_tag = msg.data
+    #     else:
+    #         self.did_RFID_change = False
         #self.get_logger().info('Received rfid_callback.')    
     def _camera_callback(self,msg1,msg2):
         self._last_rfid_data = self._current_rfid_data

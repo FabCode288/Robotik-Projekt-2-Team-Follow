@@ -4,6 +4,7 @@ class ClientLogic():
     def __init__(self):
         pass
     def get_next_client_order(self,result):
+        
         try:
             match result:
                 case "Aborted":
@@ -22,4 +23,4 @@ class ClientLogic():
                     order = None
             return order    
         except:
-            return None
+            return order

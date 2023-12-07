@@ -1,11 +1,4 @@
-#Start Befehl
-#ros2 run ro36_simple_mover_server Ro36SimpleMoverServer
-#Send empty Msg
-#ros2 action send_goal -f /go_to ro36_interfaces/action/GoTo "{}"
-#Send full Msg
-#ros2 action send_goal -f /go_to ro36_interfaces/action/GoTo "{pose: {x: 4.0, y: 4.0, theta: 0.0}}"
-#source install/setup.bash
-
+import string
 import rclpy
 import math
 import time
@@ -22,7 +15,7 @@ from ro36_interfaces.action import Move
 from rclpy.action import CancelResponse, GoalResponse
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.executors import MultiThreadedExecutor
-from ro36_simple_mover_server.simple_robot_mover import SimpleRobotMover #vllt noch ändern
+from move_server.robot_move import RobotMove
 
 class MoveServer(Node):
 
@@ -35,22 +28,22 @@ class MoveServer(Node):
         self._last_pose_theta = 0
         self._last_rfid_tag = "0"
         self._current_rfid_data = "0"
-        #datatyp and topic of rfid unclear
-        self.rfid_sub = self.create_subscription(
-            String,
-            'rfid_topic',
-            self._rfid_callback,
-            10)
+
+        # self.rfid_sub = self.create_subscription(
+        #     string,
+        #     'rfid_topic',
+        #     self._rfid_callback,
+        #     10)
         self.odom_sub = self.create_subscription(
             Odometry,
             'odom',
             self._odom_callback,
             10)
-         self.camera_sub = self.create_subscription(
-            float32
-            'camera_topic',
-            self._camera_callback,
-            10)
+        #  self.camera_sub = self.create_subscription(
+        #     Bool,float32
+        #     'camera_topic',
+        #     self._camera_callback,
+        #     10)
 
         self._cmd_pub = self.create_publisher(Twist, 'cmd_vel', 10)
 
@@ -82,26 +75,26 @@ class MoveServer(Node):
             ]
         )
         #self.get_logger().info('Received odom_callback.')
-    def _rfid_callback(self, msg):        
-        self._current_rfid_data = msg.data 
-        self.get_logger().info('Read RFID: ' + str(msg.data))
-        if (msg.data is  not "0"):
-            self._last_rfid_tag = msg.data
-        else:
-            pass
     # def _rfid_callback(self, msg):        
     #     self._current_rfid_data = msg.data 
-    #     self.get_logger().info('Read RFID: ' + str(msg.data))
+    #     self.get_logger().info('Read RFID: ' + string(msg.data))
+    #     if (msg.data != "0"):
+    #         self._last_rfid_tag = msg.data
+    #     else:
+    #         pass
+    # def _rfid_callback(self, msg):        
+    #     self._current_rfid_data = msg.data 
+    #     self.get_logger().info('Read RFID: ' + String(msg.data))
     #     if (_current_rfid_data != _last_rfid_tag):
     #         self.did_RFID_change = True
     #         self._last_rfid_tag = msg.data
     #     else:
     #         self.did_RFID_change = False
         #self.get_logger().info('Received rfid_callback.')    
-    def _camera_callback(self,msg1,msg2):
-        self._last_rfid_data = self._current_rfid_data
-        self._current_rfid_data = msg.data      
-        #self.get_logger().info('Received rfid_callback.')    
+    # def _camera_callback(self,msg1,msg2):
+    #     self._last_rfid_data = self._current_rfid_data
+    #     self._current_rfid_data = msg1.data      
+    #     #self.get_logger().info('Received rfid_callback.')    
 
 
     def _goal_callback(self, goal_request):
@@ -122,12 +115,11 @@ class MoveServer(Node):
 
     def _execute_callback(self, goal_handle):
         self.get_logger().info('Executing move')
-        mover = SimpleRobotMover()
-        #mover.set_target_pose(goal_handle.request.pose.x, goal_handle.request.pose.y, goal_handle.request.pose.theta)
-        vel = mover.get_movment_pipe(self, _last_pose_pitch, _last_pose_roll)
+        mover = RobotMove()        
+        vel = mover.get_movment_pipe(self._last_pose_pitch, self._last_pose_roll)
         self.get_logger().info("Velocity1: {}, {}".format(vel[0], vel[1]))
         while(goal_handle.is_active and not goal_handle.is_cancel_requested and vel is not None):
-            vel = mover.get_movment_pipe(self, _last_pose_pitch, _last_pose_roll) 
+            vel = mover.get_movment_pipe(self._last_pose_pitch, self._last_pose_roll) 
             self._publish_velocity(vel)
             self._publish_calculated_feedback(goal_handle, vel)
             time.sleep(0.05)
@@ -147,13 +139,12 @@ class MoveServer(Node):
             return ("Velocity: {}, {}".format(vel[0], vel[1]))
         else:
             return None
-    #Problem rfid könnte flimmern was bei einfacher Aenderung sofort abbricht
-    #Wie können wir überprüfen ob nicht der selbe rfid, an dem bereits gewendet wurde, zum Abbruch führt?
-    def _rfid_changed(self):
-        if (self._current_rfid_data is not "0" and self._last_rfid_tag is not self._current_rfid_data ): 
-            return True
-        else:
-            return False 
+   
+    # def _rfid_changed(self):
+    #     if (self._current_rfid_data != "0" and self._last_rfid_tag != self._current_rfid_data ): 
+    #         return True
+    #     else:
+    #         return False 
 
     def _publish_calculated_feedback(self, goal_handle, vel):
         feedback_msg = Move.Feedback()
@@ -181,11 +172,11 @@ class MoveServer(Node):
 def main():
     rclpy.init()
     try:
-        robot_mover_executor = MultiThreadedExecutor(3)
+        robot_mover_executor = MultiThreadedExecutor(2)
         move_server = MoveServer()
         rclpy.spin(node=move_server, executor=robot_mover_executor)
     finally:
-        simple_mover_server.destroy_node()
+        move_server.destroy_node()
         rclpy.shutdown()
 
 

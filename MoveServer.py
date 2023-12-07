@@ -141,10 +141,10 @@ class MoveServer(Node):
     #Problem rfid könnte flimmern was bei einfacher Aenderung sofort abbricht
     #Wie können wir überprüfen ob nicht der selbe rfid, an dem bereits gewendet wurde, zum Abbruch führt?
     def _rfid_changed(self):   
-        if (self._current_rfid_data is not "0" and self._last_rfid_tag == self._current_rfid_data ): 
-            return False
-        else:
+        if (self._current_rfid_data is not "0" and self._last_rfid_tag is not self._current_rfid_data ): 
             return True
+        else:
+            return False
 
     def _publish_calculated_feedback(self, goal_handle, vel):
         feedback_msg = Move.Feedback()

@@ -85,7 +85,7 @@ class MoveServer(Node):
     def _rfid_callback(self, msg):        
         self._current_rfid_data = msg.data 
         self.get_logger().info('Read RFID: ' + String(msg.data))
-        if (msg.data is  not "" and msg.data is not None):
+        if (msg.data is  not "0"):
             self._last_rfid_tag = msg.data
         else:
             pass
@@ -141,12 +141,11 @@ class MoveServer(Node):
             return None
     #Problem rfid könnte flimmern was bei einfacher Aenderung sofort abbricht
     #Wie können wir überprüfen ob nicht der selbe rfid, an dem bereits gewendet wurde, zum Abbruch führt?
-    def _rfid_changed(self):   
-        if
-        #if (self._current_rfid_data is not "0" and self._last_rfid_tag is not self._current_rfid_data ): 
-            return True #Wenn der neue Wert des RFID ein anderer ist als last_rfid_tag
+    def _rfid_changed(self):
+        if (self._current_rfid_data is not "0" and self._last_rfid_tag is not self._current_rfid_data ): 
+            return True
         else:
-            return False #Wenn der neue Wert des RFID der gleiche Wert ist wie der Alte oder kein Wert erkannt wird
+            return False 
 
     def _publish_calculated_feedback(self, goal_handle, vel):
         feedback_msg = Move.Feedback()

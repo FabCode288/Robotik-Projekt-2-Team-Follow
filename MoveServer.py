@@ -28,17 +28,20 @@ class MoveServer(Node):
         self._last_pose_theta = 0
         self._last_rfid_tag = 0
         self._current_rfid_data = 0
+        self.result_sent = False
 
-        # self.rfid_sub = self.create_subscription(
-        #     String,
-        #     'rfid_topic',
-        #     self._rfid_callback,
-        #     10)
+        self.rfid_sub = self.create_subscription(
+            String,
+            'rfid_topic',
+            self._rfid_callback,
+            10)
+        
         self.odom_sub = self.create_subscription(
             Odometry,
             'odom',
             self._odom_callback,
             10)
+        
         #  self.camera_sub = self.create_subscription(
         #     Bool,float32
         #     'camera_topic',
@@ -75,22 +78,21 @@ class MoveServer(Node):
             ]
         )
         #self.get_logger().info('Received odom_callback.')
-    # def _rfid_callback(self, msg):        
-    #     self._current_rfid_data = msg.data 
-    #     self.get_logger().info('Read RFID: ' + String(msg.data))
-    #     if (msg.data != "0"):
-    #         self._last_rfid_tag = msg.data
-    #     else:
-    #         pass
-    # def _rfid_callback(self, msg):        
-    #     self._current_rfid_data = msg.data 
-    #     self.get_logger().info('Read RFID: ' + format(msg.data))
-    #     if (_current_rfid_data != _last_rfid_tag):
-    #         self.did_RFID_change = True
-    #         self._last_rfid_tag = msg.data
-    #     else:
-    #         self.did_RFID_change = False
-        #self.get_logger().info('Received rfid_callback.')    
+
+    def _rfid_callback(self, msg):        
+        self._current_rfid_data = msg.data 
+        self.get_logger().info('Read RFID: ' + format(msg.data))
+        if (self._current_rfid_data != self._last_rfid_tag):
+            self.did_RFID_change = True
+            self._last_rfid_tag = msg.data
+        elif self._current_rfid_data == self._last_rfid_tag and self.result_sent:
+            self.did_RFID_change = False
+            self.result_sent = False
+            self.get_logger().info('Received rfid_callback.')
+        else:
+            pass
+            #rfid changed, waiting for result to be sent 
+
     # def _camera_callback(self,msg1,msg2):
     #     self._last_rfid_data = self._current_rfid_data
     #     self._current_rfid_data = msg1.data      
@@ -118,7 +120,7 @@ class MoveServer(Node):
         mover = RobotMove()        
         vel = mover.get_movment_pipe(self._last_pose_pitch, self._last_pose_roll)
         self.get_logger().info("Velocity1: {}, {}".format(vel[0], vel[1]))
-        while(goal_handle.is_active and not goal_handle.is_cancel_requested and vel is not None):
+        while(goal_handle.is_active and not goal_handle.is_cancel_requested and vel is not None and not self.did_RFID_change):
             vel = mover.get_movment_pipe(self._last_pose_pitch, self._last_pose_roll) 
             self._publish_velocity(vel)
             self._publish_calculated_feedback(goal_handle, vel)
@@ -129,7 +131,6 @@ class MoveServer(Node):
     def _publish_velocity(self, vel):
         if(vel is not None):
             velocity_msg = Twist()
-            self.get_logger().info("Velocity: {}, {}".format(vel[0], vel[1]) )
             velocity_msg.angular.z = vel[1]
             velocity_msg.linear.x = vel[0] 
             self._cmd_pub.publish(velocity_msg)
@@ -139,12 +140,6 @@ class MoveServer(Node):
             return ("Velocity: {}, {}".format(vel[0], vel[1]))
         else:
             return None
-   
-    # def _rfid_changed(self):
-    #     if (self._current_rfid_data != "0" and self._last_rfid_tag != self._current_rfid_data ): 
-    #         return True
-    #     else:
-    #         return False 
 
     def _publish_calculated_feedback(self, goal_handle, vel):
         feedback_msg = Move.Feedback()
@@ -156,6 +151,7 @@ class MoveServer(Node):
         if goal_handle.is_active and self._rfid_changed:
             self.get_logger().info('Move succeeded')
             goal_handle.succeed()
+            self.result_sent = True
             result.result = "RFID_reached"
         elif goal_handle.is_cancel_requested:
             goal_handle.canceled()

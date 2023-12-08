@@ -85,7 +85,7 @@ class MoveServer(Node):
         if (self._current_rfid_data != self._last_rfid_tag):
             self.did_RFID_change = True
             self._last_rfid_tag = msg.data
-        elif self._current_rfid_data == self._last_rfid_tag and self.result_sent:
+        elif self.did_RFID_change and self.result_sent:
             self.did_RFID_change = False
             self.result_sent = False
             self.get_logger().info('Received rfid_callback.')
@@ -148,10 +148,11 @@ class MoveServer(Node):
 
     def _determine_action_result(self, goal_handle):
         result = Move.Result()
-        if goal_handle.is_active and self._rfid_changed:
+        if goal_handle.is_active and self.did_RFID_change:
             self.get_logger().info('Move succeeded')
             goal_handle.succeed()
             self.result_sent = True
+            self.did_RFID_change = False
             result.result = "RFID_reached"
         elif goal_handle.is_cancel_requested:
             goal_handle.canceled()

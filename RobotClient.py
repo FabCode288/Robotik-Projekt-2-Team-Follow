@@ -63,9 +63,12 @@ class RobotClient(Node):
         goal_msg = Move.Goal()
         goal_msg.target_velocity = self.target_velocity
 
-        self._action_client_move.wait_for_server()
+        self._action_client_move.wait_for_server()        
+        print("wait")
         self._send_goal_future = self._action_client_move.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
+        print("send")
         self._send_goal_future.add_done_callback(self.goal_response_callback)
+        print("response")
     
     def send_goal_follow(self):
 
@@ -88,7 +91,9 @@ class RobotClient(Node):
 
 
     def goal_response_callback(self, future):
+        print("reponse start")
         goal_handle = future.result()
+        
         if not goal_handle.accepted:
             self.get_logger().info('Goal rejected :(')
             return
@@ -96,7 +101,7 @@ class RobotClient(Node):
         self.get_logger().info('Goal accepted :)')
 
         self._get_result_future = goal_handle.get_result_async()
-        self._get_result_future.add_done_callback(self.get_result_callback)
+        self._get_result_future.add_done_callback(self.get_result_callback(future))
 
     def get_result_callback(self, future):
         self._last_result = future.result().result
@@ -104,37 +109,33 @@ class RobotClient(Node):
         
         
     def feedback_callback(self, feedback_msg):
+        print("feedback called")
         feedback = feedback_msg.feedback
         self.get_logger().info('Received feedback: {0}'.format(feedback.partial_sequence))
-    def send_goal(self):
-        goal_msg = Move.Goal()
-        goal_msg.target_velocity = 1.0
-
-        self._action_client.wait_for_server()
-
-        return self._action_client.send_goal_async(goal_msg)
+ 
 
 def main(args=None):
     rclpy.init(args=args) 
     client_logic = ClientLogic()
     client_node = RobotClient()
-    print("Hallo")    
-    print(client_logic.get_next_client_order(client_node._last_result))
-    while(True): 
-        order = client_logic.get_next_client_order(client_node._last_result)       
-        match client_logic.get_next_client_order(client_node._last_result):
-            case None:           
-                print("break")
-                break
-            case "turn":
-                client_node.send_goal_turn()                 
-                print("turn")              
-            case "move":
-                client_node.send_goal_move()                
-                print("move")               
-            case "follow":
-                client_node.send_goal_follow()                
-                print("follow")            
+    order = None       
+    while(True):
+        last_order = order
+        order=client_logic.get_next_client_order(client_node._last_result)   
+        if last_order!=order:            
+            match order:
+                case None:           
+                    print("break")
+                    break
+                case "turn":
+                    client_node.send_goal_turn()                 
+                    print("turn")              
+                case "move":
+                    client_node.send_goal_move()                
+                    print("move")               
+                case "follow":
+                    client_node.send_goal_follow()                
+                    print("follow")            
         time.sleep(0.1)
     print("ciao")    
     rclpy.shutdown()

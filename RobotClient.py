@@ -11,6 +11,11 @@ from ro36_interfaces.action import Follow
 from ro36_interfaces.action import Turn
 from robot_client.client_logic import ClientLogic
 
+import threading
+
+from rclpy.callback_groups import ReentrantCallbackGroup
+from rclpy.executors import MultiThreadedExecutor
+
 class RobotClient(Node):
 
     def __init__(self):
@@ -21,15 +26,18 @@ class RobotClient(Node):
         self._action_client_move = ActionClient(
             self,
             Move, 
-            'move')   
+            'move',
+            callback_group=ReentrantCallbackGroup())   
         self._action_client_follow = ActionClient(
             self,
             Follow, 
-            'follow')    
+            'follow',
+            callback_group=ReentrantCallbackGroup())    
         self._action_client_turn = ActionClient(
             self,
             Turn, 
-            'turn')       
+            'turn',
+            callback_group=ReentrantCallbackGroup())       
 
     #     self._rfid_sub = self.create_subscription(
     #         string,
@@ -116,28 +124,33 @@ class RobotClient(Node):
 
 def main(args=None):
     rclpy.init(args=args) 
-    client_logic = ClientLogic()
-    client_node = RobotClient()
-    order = None       
-    while(True):
-        last_order = order
-        order=client_logic.get_next_client_order(client_node._last_result)   
-        if last_order!=order:            
-            match order:
-                case None:           
-                    print("break")
-                    break
-                case "turn":
-                    client_node.send_goal_turn()                 
-                    print("turn")              
-                case "move":
-                    client_node.send_goal_move()                
-                    print("move")               
-                case "follow":
-                    client_node.send_goal_follow()                
-                    print("follow")            
-        time.sleep(0.1)
-    print("ciao")    
-    rclpy.shutdown()
+    try:
+        client_logic = ClientLogic()
+        client_node = RobotClient()
+        robot_client_executor= MultiThreadedExecutor(3)
+        
+        order = None       
+        while(True):
+            last_order = order
+            order=client_logic.get_next_client_order(client_node._last_result)   
+            if last_order!=order:            
+                match order:
+                    case None:           
+                        print("break")
+                        break
+                    case "turn":
+                        client_node.send_goal_turn()                 
+                        print("turn")              
+                    case "move":
+                        client_node.send_goal_move()                
+                        print("move")               
+                    case "follow":
+                        client_node.send_goal_follow()                
+                        print("follow")            
+            rclpy.spin(node=client_node,executor=robot_client_executor)
+            time.sleep(0.1)
+    finally:
+        client_node.destroy_node()   
+        rclpy.shutdown()
 if __name__ == '__main__':
     main()

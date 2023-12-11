@@ -22,7 +22,7 @@ from ro36_interfaces.action import Turn
 from rclpy.action import CancelResponse, GoalResponse
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.executors import MultiThreadedExecutor
-from ro36_simple_mover_server.simple_robot_mover import SimpleRobotMover
+from turn_server.robot_turn import RobotTurn
 
 class TurnServer(Node):
 
@@ -90,37 +90,35 @@ class TurnServer(Node):
 
     def _execute_callback(self, goal_handle):
         self.get_logger().info('Executing turn')
-        mover = SimpleRobotMover()
+        mover = RobotTurn(self._last_pose_theta, goal_handle.request.target_velocity)
         #mover.set_target_pose(goal_handle.request.pose.x, goal_handle.request.pose.y, goal_handle.request.pose.theta)
-        vel = mover.turn(self, _last_pose_pitch, _last_pose_roll) #inputs tbd
+        vel = mover.turn(self._last_pose_theta) 
         self.get_logger().info("Velocity1: {}, {}".format(vel[0], vel[1]))
         while(goal_handle.is_active and not goal_handle.is_cancel_requested and vel is not None):
-            vel = mover.get_movment_pipe(self, _last_pose_pitch, _last_pose_roll) 
+            vel = mover.turn(self._last_pose_theta) 
             self._publish_velocity(vel)
-            self._publish_calculated_feedback(goal_handle)
+            self._publish_feedback(goal_handle, vel)
             time.sleepms(50)
         self._publish_velocity(None)
-        return self._determine_action_result(goal_handle)
+        return self._determine_action_result(goal_handle, vel)
 
     def _publish_velocity(self, vel):
         if(vel is not None):
             velocity_msg = Twist()
-            self.get_logger().info("Velocity: {}, {}".format(vel[0], vel[1]) )
+            self.get_logger().info("Velocity: {}, {}".format(vel[0], vel[1]))
             velocity_msg.angular.z = vel[1]
             velocity_msg.linear.x = vel[0] 
             self._cmd_pub.publish(velocity_msg)
 
-    def _dist_to_goal(self, goal_handle):
-        return 2 #winkel to go
 
-    def _publish_calculated_feedback(self, goal_handle):
+    def _publish_feedback(self, goal_handle, vel):
         feedback_msg = Turn.Feedback()
-        feedback_msg.dist_to_goal = self._dist_to_goal(goal_handle)
+        feedback_msg.current_velocity = vel[1]
         goal_handle.publish_feedback(feedback_msg)
 
-    def _determine_action_result(self, goal_handle):
+    def _determine_action_result(self, goal_handle, vel):
         result = Turn.Result()
-        if goal_handle.is_active and self._dist_to_goal(goal_handle) <= 0:
+        if goal_handle.is_active and vel[1]<=0:
             self.get_logger().info('Turn succeeded')
             goal_handle.succeed()
             result.result = "Turn_succesfull"
@@ -140,10 +138,10 @@ def main():
     rclpy.init()
     try:
         robot_mover_executor = MultiThreadedExecutor(2)
-        simple_mover_server = TurnServer()
-        rclpy.spin(node=simple_mover_server, executor=robot_mover_executor)
+        turn_server = TurnServer()
+        rclpy.spin(node=turn_server, executor=robot_mover_executor)
     finally:
-        simple_mover_server.destroy_node()
+        turn_server.destroy_node()
         rclpy.shutdown()
 
 

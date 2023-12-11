@@ -20,7 +20,8 @@ class RobotClient(Node):
 
     def __init__(self):
         self._last_result = "Start"
-        self.target_velocity= 0.1
+        self.target_velocity_linear= 0.1
+        self.target_velocity_angular = 0.1
         self.target_distance= 0.1
         super().__init__('pipe_client')       
         self._action_client_move = ActionClient(
@@ -69,14 +70,12 @@ class RobotClient(Node):
     def send_goal_move(self):
 
         goal_msg = Move.Goal()
-        goal_msg.target_velocity = self.target_velocity
+        goal_msg.target_velocity[0] = self.target_velocity_linear
+        goal_msg.target_velocity[1] = self.target_velocity_angular
 
         self._action_client_move.wait_for_server()        
-        print("wait")
         self._send_goal_future = self._action_client_move.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
-        print("send")
         self._send_goal_future.add_done_callback(self.goal_response_callback)
-        print("response")
     
     def send_goal_follow(self):
 
@@ -90,7 +89,7 @@ class RobotClient(Node):
     def send_goal_turn(self):
 
         goal_msg = Turn.Goal()
-        goal_msg.target_velocity = self.target_velocity/2
+        goal_msg.target_velocity = self.target_velocity_angular
 
         self._action_client_turn.wait_for_server()
         self._send_goal_future = self._action_client_turn.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
@@ -99,27 +98,25 @@ class RobotClient(Node):
 
 
     def goal_response_callback(self, future):
-        print("reponse start")
         goal_handle = future.result()
         
         if not goal_handle.accepted:
-            self.get_logger().info('Goal rejected :(')
+            self.get_logger().info('Goal rejected')
             return
 
-        self.get_logger().info('Goal accepted :)')
+        self.get_logger().info('Goal accepted')
 
         self._get_result_future = goal_handle.get_result_async()
         self._get_result_future.add_done_callback(self.get_result_callback(future))
 
     def get_result_callback(self, future):
-        self._last_result = future.result().result
-        self.get_logger().info('Result: {0}'.format(self._last_result.sequence))
+        self._last_result = future.result().get_result().result.result
+        self.get_logger().info('Result: {0}'.format(self._last_result))
         
         
     def feedback_callback(self, feedback_msg):
-        print("feedback called")
         feedback = feedback_msg.feedback
-        self.get_logger().info('Received feedback: {0}'.format(feedback.partial_sequence))
+        self.get_logger().info('Received feedback: {0}'.format(feedback.current_velocity.linear.x) + ' ' + format(feedback.current_velocity.angular.z))
  
 
 def main(args=None):
@@ -127,7 +124,7 @@ def main(args=None):
     try:
         client_logic = ClientLogic()
         client_node = RobotClient()
-        robot_client_executor= MultiThreadedExecutor(3)
+        robot_client_executor= MultiThreadedExecutor(5)
         
         order = None       
         while(True):
@@ -147,8 +144,8 @@ def main(args=None):
                     case "follow":
                         client_node.send_goal_follow()                
                         print("follow")            
-            rclpy.spin(node=client_node,executor=robot_client_executor)
-            time.sleep(0.1)
+            rclpy.spin_once(node=client_node,executor=robot_client_executor)
+            time.sleep(0.04)
     finally:
         client_node.destroy_node()   
         rclpy.shutdown()

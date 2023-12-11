@@ -116,14 +116,18 @@ class MoveServer(Node):
     def _execute_callback(self, goal_handle):
         self.get_logger().info('Executing move')
         mover = RobotMove()         
-        vel = mover.get_movement_pipe(self._last_pose_pitch, self._last_pose_roll, 1.0)        
-        self.get_logger().info("Velocity1: {}, {}".format(vel[0], vel[1]))
-        while(goal_handle.is_active and not goal_handle.is_cancel_requested and vel is not None):
-            vel = mover.get_movement_pipe(self._last_pose_pitch, self._last_pose_roll,1.0) 
+        vel = mover.get_movement_pipe(self._last_pose_pitch, self._last_pose_roll,
+                                      goal_handle.request.target_velocity[0],goal_handle.request.target_velocity[1])        
+        self.get_logger().info("Velocity: {}, {}".format(vel[0], vel[1]))
+        i=10
+        while(goal_handle.is_active and not goal_handle.is_cancel_requested and vel is not None and i>0):
+            vel = mover.get_movement_pipe(self._last_pose_pitch, self._last_pose_roll,
+                                          goal_handle.request.target_velocity[0],goal_handle.request.target_velocity[1]) 
             self._publish_velocity(vel)
             self._publish_feedback(goal_handle, vel)
+            i=i-1
             time.sleep(0.05)
-            break
+            
         self._publish_velocity(None)
         return self._determine_action_result(goal_handle)
 

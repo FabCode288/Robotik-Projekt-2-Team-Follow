@@ -94,13 +94,13 @@ class TurnServer(Node):
         #mover.set_target_pose(goal_handle.request.pose.x, goal_handle.request.pose.y, goal_handle.request.pose.theta)
         vel = mover.turn(self._last_pose_theta, goal_handle.request.target_velocity) 
         self.get_logger().info("Velocity1: {}, {}".format(vel[0], vel[1]))
-        i=10
-        while(goal_handle.is_active and not goal_handle.is_cancel_requested and vel is not None and i>0):
+        i=10 #dummy
+        while(goal_handle.is_active and not goal_handle.is_cancel_requested and vel is not None and i>0 #dummy):
             vel = mover.turn(self._last_pose_theta, goal_handle.request.target_velocity) 
             self._publish_velocity(vel)
             self._publish_feedback(goal_handle, vel)
             time.sleep(0.05)
-            i=i-1
+            i=i-1#dummy
         self._publish_velocity(None)
         return self._determine_action_result(goal_handle, vel)
 

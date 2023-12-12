@@ -1,11 +1,5 @@
 # Robotik-Projekt-2-Team-Follow
-Wer/Wo schreibt Werte in result, wie Succeed oder Aborted?
---> Im Server result festlegen
 
-ein knoten hat clients und die state machine
-clients leben gleichzeitig
-result = enum für state machine
-spin bis crtl c
 
 kamera
 /dev/video0

@@ -105,11 +105,12 @@ class MoveServer(Node):
         self.get_logger().info('Executing move')
         mover = RobotMove()         
         vel = mover.get_movement_pipe(self._last_pose_pitch, self._last_pose_roll,
-                                      goal_handle.request.target_velocity[0],goal_handle.request.target_velocity[1],self._last_rfid_tag,-1.0) #cam einfügen       
-        self.get_logger().info("Velocity: {}, {}".format(vel[0], vel[1]))        
+                                      goal_handle.request.target_velocity[0],
+                                      goal_handle.request.target_velocity[1],self._last_rfid_tag,-1.0) #cam einfügen       
         while(goal_handle.is_active and not goal_handle.is_cancel_requested and vel is not None):
             vel = mover.get_movement_pipe(self._last_pose_pitch, self._last_pose_roll,
-                                          goal_handle.request.target_velocity[0],goal_handle.request.target_velocity[1],self._last_rfid_tag,-1.0) #cam einfügen
+                                          goal_handle.request.target_velocity[0],
+                                          goal_handle.request.target_velocity[1],self._last_rfid_tag,-1.0) #cam einfügen
             self._publish_velocity(vel)
             self._publish_feedback(goal_handle, vel)
             time.sleep(0.05)

@@ -74,14 +74,7 @@ class MoveServer(Node):
                 msg.pose.pose.orientation.w 
             ]
         )
-        #self.get_logger().info('Received odom_callback.')
-    # def _rfid_callback(self, msg):        
-    #     self._current_rfid_data = msg.data 
-    #     self.get_logger().info('Read RFID: ' + String(msg.data))
-    #     if (msg.data != "0"):
-    #         self._last_rfid_tag = msg.data
-    #     else:
-    #         pass
+     
     def _rfid_callback(self, msg):  
         self._last_rfid_tag = msg.data   
         self.get_logger().info('Read RFID: ' + format(msg.data))
@@ -112,11 +105,11 @@ class MoveServer(Node):
         self.get_logger().info('Executing move')
         mover = RobotMove()         
         vel = mover.get_movement_pipe(self._last_pose_pitch, self._last_pose_roll,
-                                      goal_handle.request.target_velocity[0],goal_handle.request.target_velocity[1],self._last_rfid_tag)        
+                                      goal_handle.request.target_velocity[0],goal_handle.request.target_velocity[1],self._last_rfid_tag,-1.0) #cam einfügen       
         self.get_logger().info("Velocity: {}, {}".format(vel[0], vel[1]))        
-        while(goal_handle.is_active and not goal_handle.is_cancel_requested and vel is not None and self._did_rfid_change==False):
+        while(goal_handle.is_active and not goal_handle.is_cancel_requested and vel is not None):
             vel = mover.get_movement_pipe(self._last_pose_pitch, self._last_pose_roll,
-                                          goal_handle.request.target_velocity[0],goal_handle.request.target_velocity[1],self._last_rfid_tag) 
+                                          goal_handle.request.target_velocity[0],goal_handle.request.target_velocity[1],self._last_rfid_tag,-1.0) #cam einfügen
             self._publish_velocity(vel)
             self._publish_feedback(goal_handle, vel)
             time.sleep(0.05)
@@ -128,9 +121,14 @@ class MoveServer(Node):
         if(vel is not None):
             velocity_msg = Twist()
             self.get_logger().info("Velocity: {}, {}".format(vel[0], vel[1]) )
-            velocity_msg.angular.z = vel[1]
-            velocity_msg.linear.x = vel[0] 
+            velocity_msg.angular.z = float(vel[1])
+            velocity_msg.linear.x = float(vel[0]) 
             self._cmd_pub.publish(velocity_msg)
+        else:
+            velocity_msg = Twist()            
+            velocity_msg.angular.z = 0.0
+            velocity_msg.linear.x = 0.0 
+            self._cmd_pub.publish(velocity_msg)    
 
     # def _current_velocity(self, vel):
     #     if(vel is not None):

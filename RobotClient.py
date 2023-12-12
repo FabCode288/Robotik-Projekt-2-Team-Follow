@@ -42,32 +42,7 @@ class RobotClient(Node):
             'turn',
             callback_group=ReentrantCallbackGroup())       
 
-    #     self._rfid_sub = self.create_subscription(
-    #         string,
-    #         'rfid_topic',
-    #         self._rfid_callback,
-    #         10)
-    #     self._camera_sub = self.create_subscription(
-    #         Image,
-    #         'camera_topic',
-    #         self.image_callback,
-    #         10)
-        
-    # def _rfid_callback(self,msg):
-    #         self._last_rfid_data = msg.data      
-    #         #self.get_logger().info('Received rfid_callback.')  
-    #         #   
-    # def _rfid_reached(self):   
-    #     if (self._last_rfid_data == 1): 
-    #         return True
-    #     else:
-    #         return False
-
-    # def _image_callback():
-    #     pass
-
-    # def robot_detected():
-    #     pass
+  
 
     def send_goal_move(self):
 
@@ -126,15 +101,16 @@ def main(args=None):
         client_logic = ClientLogic()
         client_node = RobotClient()
         robot_client_executor= MultiThreadedExecutor(5)        
-        order = None       
-        while(True):
+        order = None 
+        crash_var=True      
+        while(crash_var):
             last_order = order
             order=client_logic.get_next_client_order(client_node._last_result)   
             if last_order!=order:            
                 match order:
                     case None:           
                         print("break")
-                        break
+                        crash_var = False
                     case "turn":
                         client_node.send_goal_turn()                 
                         print("turn")              
@@ -144,8 +120,7 @@ def main(args=None):
                     case "follow":
                         client_node.send_goal_follow()                
                         print("follow")            
-            rclpy.spin_once(node=client_node,executor=robot_client_executor)
-        client_node.destroy_node()    
+            rclpy.spin_once(node=client_node,executor=robot_client_executor)        
     finally:
         client_node.destroy_node()   
         rclpy.shutdown()

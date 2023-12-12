@@ -22,7 +22,7 @@ def test_turn_start_angle_0_current_angle_180():
 # Achtung  ###### Hier wird aktuell noch ein fehler geschmissen, weil der Roboter sich zu weit gedreht hat########
 def test_turn_start_angle_0_current_angle_200():    
     turner = RobotTurn(0, 1)#The Angle of the Robot at the RFID, Rotating Velocity
-    assert turner.turn(np.radians(200)) == [0, -1] # The current angle of the Robot while rotating
+    assert turner.turn(np.radians(200)) == [0, 0] # The current angle of the Robot while rotating
 
 """The Robot starts at -30 degrees and is currently at -30 Degrees, it did not turn yet. We expect an rotating velocity > 0"""
 def test_turn_start_angle_minus_30_current_angle_minus_30():

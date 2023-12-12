@@ -7,7 +7,7 @@ from rclpy.node import Node
 from std_msgs.msg import String
 
 """
-Creating a new minimal publisher to publish the current value of the RFID sensor with a constant frequency
+Creating a new minimal publisher to publish the value of the RFID sensor with a constant frequency
 """
 
 class Minimal_RFID_Publisher(Node):
@@ -26,7 +26,8 @@ class Minimal_RFID_Publisher(Node):
         """
         This Method is called after every timer period 
         The RFID reader reads the value and stores it
-        Then the publisher publish's the data of the RFID sensor 
+        If the reader reads a value, then the publisher publishs the data of the RFID sensor 
+        If the reader does not read an value nothing happens
         """
         # try:
         #     self.rfid_id, self.rfid_data = reader.read() #Reading the id and the data that is meassured by the rfid-chip

@@ -10,7 +10,7 @@ Then the method returns None
 """
 def test_gmp_invalid_parameters():
     mover = RobotMove()
-    assert mover.get_movement_pipe(None) == None
+    assert mover.get_movement_pipe(0,0,0,0,0,0) == None
     
 """
 Given a new RobotMove

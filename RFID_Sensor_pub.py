@@ -6,24 +6,28 @@ from rclpy.node import Node
 
 from std_msgs.msg import String
 
+"""
+Creating a new minimal publisher to publish the current value of the RFID sensor with a constant frequency
+"""
 
 class Minimal_RFID_Publisher(Node):
-
-    """
-    Creating a new minimal publisher to publish the current value of the RFID sensor with constant frequency
-    """
 
     def __init__(self):
         super().__init__('rfid_publisher')
         self.publisher_ = self.create_publisher(String, 'rfid_topic', 10) #Creating the publisher
         timer_period = 1.0  # pulishs Data String with 5Hz
-        self.timer = self.create_timer(timer_period, self.timer_callback) #Crating the timer for a current frequency
+        self.timer = self.create_timer(timer_period, self.timer_callback) #Creating the timer for a current frequency
         # self.rfid_id #The id of the rfid-chip
         # self.rfid_data #The data of the rfid-chip
 
         self.i = 0
 
     def timer_callback(self):
+        """
+        This Method is called after every timer period 
+        The RFID reader reads the value and stores it
+        Then the publisher publish's the data of the RFID sensor 
+        """
         # try:
         #     self.rfid_id, self.rfid_data = reader.read() #Reading the id and the data that is meassured by the rfid-chip
         # except:

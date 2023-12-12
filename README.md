@@ -20,3 +20,8 @@ from mfrc522 import SimpleMFRC522
 -> docu
 
 Akku: 12V!!
+
+documentation?
+
+warum stürzt der client bei änderung des goals ab?
+

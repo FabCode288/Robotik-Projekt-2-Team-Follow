@@ -12,14 +12,8 @@ class RobotFollow:
         
 
     def follow(self, dist_to_robot, pitch, roll):
-        if dist_to_robot > self.wanted_dist+0.02:#beschleunigen
-            self.default_v += 0.05
-            return self.get_movement_pipe(pitch, roll, self.default_v, self.default_omega)
-        elif dist_to_robot <= self.wanted_dist:#stop
-            return [0,0]
-        else:#bremsen
-            self.default_v -= 0.05
-            return self.get_movement_pipe(pitch, roll, self.default_v, self.default_omega)
+        res = (dist_to_robot-self.wanted_dist)*0.1 #Faktor noch einstellen
+        return self.get_movement_pipe(pitch,roll, res*self.default_v, self.default_omega)
 
 
     def get_movement_pipe(self, pitch, roll, v, omega):

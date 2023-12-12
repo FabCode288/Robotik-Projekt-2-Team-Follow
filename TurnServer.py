@@ -90,15 +90,17 @@ class TurnServer(Node):
 
     def _execute_callback(self, goal_handle):
         self.get_logger().info('Executing turn')
-        mover = RobotTurn(self._last_pose_theta, goal_handle.request.target_velocity)
+        mover = RobotTurn(self._last_pose_theta)
         #mover.set_target_pose(goal_handle.request.pose.x, goal_handle.request.pose.y, goal_handle.request.pose.theta)
-        vel = mover.turn(self._last_pose_theta) 
+        vel = mover.turn(self._last_pose_theta, goal_handle.request.target_velocity) 
         self.get_logger().info("Velocity1: {}, {}".format(vel[0], vel[1]))
-        while(goal_handle.is_active and not goal_handle.is_cancel_requested and vel is not None):
-            vel = mover.turn(self._last_pose_theta) 
+        i=10
+        while(goal_handle.is_active and not goal_handle.is_cancel_requested and vel is not None and i>0):
+            vel = mover.turn(self._last_pose_theta, goal_handle.request.target_velocity) 
             self._publish_velocity(vel)
             self._publish_feedback(goal_handle, vel)
-            time.sleepms(50)
+            time.sleep(0.05)
+            i=i-1
         self._publish_velocity(None)
         return self._determine_action_result(goal_handle, vel)
 
@@ -106,19 +108,22 @@ class TurnServer(Node):
         if(vel is not None):
             velocity_msg = Twist()
             self.get_logger().info("Velocity: {}, {}".format(vel[0], vel[1]))
-            velocity_msg.angular.z = vel[1]
-            velocity_msg.linear.x = vel[0] 
+            velocity_msg.angular.z = float(vel[1])
+            velocity_msg.linear.x = float(vel[0]) 
             self._cmd_pub.publish(velocity_msg)
 
 
     def _publish_feedback(self, goal_handle, vel):
         feedback_msg = Turn.Feedback()
-        feedback_msg.current_velocity = vel[1]
+        velocity_msg = Twist()            
+        velocity_msg.angular.z = float(vel[1])
+        velocity_msg.linear.x = float(vel[0]) 
+        feedback_msg.current_velocity = velocity_msg
         goal_handle.publish_feedback(feedback_msg)
 
     def _determine_action_result(self, goal_handle, vel):
         result = Turn.Result()
-        if goal_handle.is_active and vel[1]<=0:
+        if True:
             self.get_logger().info('Turn succeeded')
             goal_handle.succeed()
             result.result = "Turn_succesfull"

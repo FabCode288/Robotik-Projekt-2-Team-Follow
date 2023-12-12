@@ -1,5 +1,5 @@
 import time
-from mfrc522 import SimpleMFRC522
+#from mfrc522 import SimpleMFRC522
 
 import rclpy
 from rclpy.node import Node
@@ -12,10 +12,10 @@ class Minimal_RFID_Publisher(Node):
     def __init__(self):
         super().__init__('rfid_publisher')
         self.publisher_ = self.create_publisher(String, 'rfid_topic', 10)
-        timer_period = 0.2  # pulishs Data String with 5Hz
+        timer_period = 1.0  # pulishs Data String with 5Hz
         self.timer = self.create_timer(timer_period, self.timer_callback)
-        self.rfid_id #The id of the rfid-chip
-        self.rfid_data #The data of the rfid-chip
+        # self.rfid_id #The id of the rfid-chip
+        # self.rfid_data #The data of the rfid-chip
 
         self.i = 0
 
@@ -29,19 +29,20 @@ class Minimal_RFID_Publisher(Node):
         #     msg.data = self.rfid_data
         #     self.publisher_.publish(msg)
         #     self.get_logger().info('Publishing: "%s"' % msg.data)
-        if i<200:
+        if self.i<5:
             msg = String()
-            msg.data = None
+            msg.data = "None"
             self.publisher_.publish(msg)
             self.i += 1  
-        else
+        else:
             msg = String()
             msg.data = "rfid1"
             self.publisher_.publish(msg)
+        print("send")
 
 def main(args=None):
     rclpy.init(args=args)
-    reader = SimpleMFRC522()
+    #reader = SimpleMFRC522()
 
     minimal_publisher = Minimal_RFID_Publisher()
 

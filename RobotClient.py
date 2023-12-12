@@ -3,6 +3,7 @@ import string
 import time
 from rclpy.action import ActionClient
 from rclpy.node import Node
+import numpy as np
 
 from sensor_msgs.msg import Image
 
@@ -20,8 +21,9 @@ class RobotClient(Node):
 
     def __init__(self):
         self._last_result = "Start"
-        self.target_velocity_linear= 0.1
-        self.target_velocity_angular = 0.1
+        self.target_velocity_linear= 1.0
+        self.target_velocity_angular = 1.0
+        self.target_velocity = [self.target_velocity_linear,self.target_velocity_angular]
         self.target_distance= 0.1
         super().__init__('pipe_client')       
         self._action_client_move = ActionClient(
@@ -70,8 +72,7 @@ class RobotClient(Node):
     def send_goal_move(self):
 
         goal_msg = Move.Goal()
-        goal_msg.target_velocity[0] = self.target_velocity_linear
-        goal_msg.target_velocity[1] = self.target_velocity_angular
+        goal_msg.target_velocity = self.target_velocity
 
         self._action_client_move.wait_for_server()        
         self._send_goal_future = self._action_client_move.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
@@ -111,7 +112,7 @@ class RobotClient(Node):
 
     def get_result_callback(self, future):
         self._last_result = future.result().get_result().result.result
-        self.get_logger().info('Result: {0}'.format(self._last_result))
+        self.get_logger().info('Result: {0}'.format(future.result().get_result().result.result))
         
         
     def feedback_callback(self, feedback_msg):
@@ -124,8 +125,7 @@ def main(args=None):
     try:
         client_logic = ClientLogic()
         client_node = RobotClient()
-        robot_client_executor= MultiThreadedExecutor(5)
-        
+        robot_client_executor= MultiThreadedExecutor(5)        
         order = None       
         while(True):
             last_order = order
@@ -145,7 +145,7 @@ def main(args=None):
                         client_node.send_goal_follow()                
                         print("follow")            
             rclpy.spin_once(node=client_node,executor=robot_client_executor)
-            time.sleep(0.04)
+        client_node.destroy_node()    
     finally:
         client_node.destroy_node()   
         rclpy.shutdown()

@@ -22,4 +22,4 @@ class ClientLogic():
                     order = None
             return order    
         except:
-            return order
+            return None

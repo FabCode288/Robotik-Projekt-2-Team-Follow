@@ -9,7 +9,7 @@ When the method get_movement_pipe is called with invalid parameters
 Then the method returns None
 """
 def test_gmp_invalid_parameters():
-    mover = RobotMove
+    mover = RobotMove()
     assert mover.get_movement_pipe(None) == None
     
 """
@@ -19,7 +19,7 @@ Then the method returns [RobotMove._v, 0]
 """
 
 def test_gmp_0_0():
-    mover = RobotMove
+    mover = RobotMove()
     assert mover.get_movement_pipe(0,0) == [RobotMove._v, 0]
 
 """
@@ -29,7 +29,7 @@ Then the method returns [0, RobotMove._omega]
 """
 
 def test_gmp_pi2_0():
-    mover = RobotMove
+    mover = RobotMove()
     assert mover.get_movement_pipe(np.pi/2,0) == [0, RobotMove._omega]
 
 """
@@ -39,7 +39,7 @@ Then the method returns [0, -RobotMove._omega]
 """
 
 def test_gmp_0_pi2():
-    mover = RobotMove
+    mover = RobotMove()
     assert mover.get_movement_pipe(0, np.pi/2) == [0, -RobotMove._omega]   
 
 """
@@ -49,7 +49,7 @@ Then the method returns [0, -RobotMove._omega]
 """
 
 def test_gmp_pi2_pi2():
-    mover = RobotMove
+    mover = RobotMove()
     assert mover.get_movement_pipe(np.pi/2,np.pi/2) == [0, -RobotMove._omega]
 
 """
@@ -59,7 +59,7 @@ Then the method returns [0, -RobotMove._omega]
 """
 
 def test_gmp_pi2_1():
-    mover = RobotMove
+    mover = RobotMove()
     assert mover.get_movement_pipe(np.pi/2,1) == [0, -RobotMove._omega]
 
 """
@@ -69,5 +69,5 @@ Then the method returns [0, RobotMove._omega]
 """
 
 def test_gmp_pi2_minus1():
-    mover = RobotMove
+    mover = RobotMove()
     assert mover.get_movement_pipe(np.pi/2,-1) == [0, RobotMove._omega]

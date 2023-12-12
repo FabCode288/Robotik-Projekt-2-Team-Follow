@@ -7,6 +7,11 @@ class RobotTurn():
         self.default_omega = default_omega
 
     def turn(self, current_angle):
+        """
+        Checks if the desired target angle is reached
+        If not, it returns the velocity to turn with,
+        else it returns the command to stop
+        """
         if current_angle < self.end_angle:
             return [0, self.default_omega]
         else:

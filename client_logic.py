@@ -1,10 +1,14 @@
-
+"""
+Serves as an object in the clients main to process the last result and returns the next order
+"""
 
 class ClientLogic():
     def __init__(self):
         pass
 
-    """Returns the next goal that the client should send depending on the the currente value of result"""
+    """
+    Returns the next goal that the client should send depending on the the current value of result
+    """
     
     def get_next_client_order(self,result):
         try:

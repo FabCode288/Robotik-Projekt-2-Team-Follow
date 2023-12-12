@@ -9,8 +9,8 @@ from std_msgs.msg import String
 
 class Minimal_RFID_Publisher(Node):
 
-    """Creating a new minimal publisher to publish the current value of the RFID sensor with constant frequency
-
+    """
+    Creating a new minimal publisher to publish the current value of the RFID sensor with constant frequency
     """
 
     def __init__(self):

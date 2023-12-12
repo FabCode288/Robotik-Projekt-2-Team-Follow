@@ -20,7 +20,7 @@ Then the method returns [RobotMove._v, 0]
 
 def test_gmp_0_0():
     mover = RobotMove()
-    assert mover.get_movement_pipe(0,0) == [RobotMove._v, 0, "None", -1.0]
+    assert mover.get_movement_pipe(0,0, "None", -1.0) == [RobotMove._v, 0]
 
 """
 Given a new RobotMove
@@ -30,7 +30,7 @@ Then the method returns [0, RobotMove._omega]
 
 def test_gmp_pi2_0():
     mover = RobotMove()
-    assert mover.get_movement_pipe(np.pi/2,0) == [0, RobotMove._omega, "None", -1.0]
+    assert mover.get_movement_pipe(np.pi/2,0, "None", -1.0) == [0, RobotMove._omega]
 
 """
 Given a new RobotMove
@@ -40,7 +40,7 @@ Then the method returns [0, -RobotMove._omega]
 
 def test_gmp_0_pi2():
     mover = RobotMove()
-    assert mover.get_movement_pipe(0, np.pi/2) == [0, -RobotMove._omega, "None", -1.0]   
+    assert mover.get_movement_pipe(0, np.pi/2, "None", -1.0) == [0, -RobotMove._omega]   
 
 """
 Given a new RobotMove
@@ -50,7 +50,7 @@ Then the method returns [0, -RobotMove._omega]
 
 def test_gmp_pi2_pi2():
     mover = RobotMove()
-    assert mover.get_movement_pipe(np.pi/2,np.pi/2) == [0, -RobotMove._omega, "None", -1.0]
+    assert mover.get_movement_pipe(np.pi/2,np.pi/2, "None", -1.0) == [0, -RobotMove._omega]
 
 """
 Given a new RobotMove
@@ -60,7 +60,7 @@ Then the method returns [0, -RobotMove._omega]
 
 def test_gmp_pi2_1():
     mover = RobotMove()
-    assert mover.get_movement_pipe(np.pi/2,1) == [0, -RobotMove._omega, "None", -1.0]
+    assert mover.get_movement_pipe(np.pi/2,1, "None", -1.0) == [0, -RobotMove._omega]
 
 """
 Given a new RobotMove
@@ -70,4 +70,4 @@ Then the method returns [0, RobotMove._omega]
 
 def test_gmp_pi2_minus1():
     mover = RobotMove()
-    assert mover.get_movement_pipe(np.pi/2,-1) == [0, RobotMove._omega, "None", -1.0]
+    assert mover.get_movement_pipe(np.pi/2,-1, "None", -1.0) == [0, RobotMove._omega]

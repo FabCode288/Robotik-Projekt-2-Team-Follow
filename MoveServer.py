@@ -118,14 +118,13 @@ class MoveServer(Node):
         return self._determine_action_result(goal_handle)
 
     def _publish_velocity(self, vel):
+        velocity_msg = Twist() 
         if(vel is not None):
-            velocity_msg = Twist()
             self.get_logger().info("Velocity: {}, {}".format(vel[0], vel[1]) )
             velocity_msg.angular.z = float(vel[1])
             velocity_msg.linear.x = float(vel[0]) 
             self._cmd_pub.publish(velocity_msg)
         else:
-            velocity_msg = Twist()            
             velocity_msg.angular.z = 0.0
             velocity_msg.linear.x = 0.0 
             self._cmd_pub.publish(velocity_msg)    
@@ -146,12 +145,13 @@ class MoveServer(Node):
     #         return False 
 
     def _publish_feedback(self, goal_handle, vel):
-        feedback_msg = Move.Feedback()
-        velocity_msg = Twist()            
-        velocity_msg.angular.z = vel[1]
-        velocity_msg.linear.x = vel[0] 
-        feedback_msg.current_velocity = velocity_msg
-        goal_handle.publish_feedback(feedback_msg)
+        if(vel is not None):
+            feedback_msg = Move.Feedback()
+            velocity_msg = Twist()            
+            velocity_msg.angular.z = vel[1]
+            velocity_msg.linear.x = vel[0] 
+            feedback_msg.current_velocity = velocity_msg
+            goal_handle.publish_feedback(feedback_msg)
 
     def _determine_action_result(self, goal_handle):
         result = Move.Result()

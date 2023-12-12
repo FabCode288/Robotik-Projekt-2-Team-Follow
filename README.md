@@ -25,3 +25,5 @@ documentation?
 
 warum stürzt der client bei änderung des goals ab?
 
+Testen: move, turn
+

@@ -13,7 +13,7 @@ class RobotFollow:
 
     def follow(self, dist_to_robot, pitch, roll):
         res = (dist_to_robot-self.wanted_dist)*0.1 #Faktor noch einstellen
-        return self.get_movement_pipe(pitch,roll, res*self.default_v, self.default_omega)
+        return self.get_movement_pipe(pitch,roll, self.default_v+res*self.default_v, self.default_omega)
 
 
     def get_movement_pipe(self, pitch, roll, v, omega):

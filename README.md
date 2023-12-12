@@ -18,6 +18,7 @@ timer auf 10 Hz
 rfid:
 from mfrc522 import SimpleMFRC522
 -> docu
+--> Bib installieren noch zu erledigen
 
 Akku: 12V!!
 

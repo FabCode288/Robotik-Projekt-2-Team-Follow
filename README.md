@@ -18,10 +18,9 @@ Akku: 12V!!
 
 documentation?
 
-warum stürzt der client bei änderung des goals ab?
-
 Testen: move, turn
 
  Fragen: 
  Wie kann man erkennen, ob ein Roboter von hinten oder von vorne gesehen wird?
- 
+ Oder ist das gar nicht notwendig?
+ warum stürzt der client bei änderung des goals ab?

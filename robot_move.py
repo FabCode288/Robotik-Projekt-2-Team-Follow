@@ -1,4 +1,7 @@
-#Make the robot move inside the pipe until the rfid is reached or an aruco marker is detected
+"""
+Logic unit to controll the movement of a robot inside a pipe 
+Makeing sure he heads towards the middle of the pipe or stops at an encountered RFID_tag or ArUco_marker
+"""
 
 import numpy as np
 import math

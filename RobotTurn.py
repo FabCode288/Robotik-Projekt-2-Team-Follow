@@ -10,12 +10,12 @@ class RobotTurn():
         """
         Checks if the desired target angle is reached
         If not, it returns the velocity to turn with,
-        else it returns the command to stop
+        else it returns None
         """
         if current_angle < self.end_angle:
             return [0, self.default_omega]
         else:
-            return [0,0]
+            return None
         
         
        

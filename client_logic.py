@@ -3,6 +3,9 @@
 class ClientLogic():
     def __init__(self):
         pass
+
+    """Returns the next goal that the client should send depending on the the currente value of result"""
+    
     def get_next_client_order(self,result):
         try:
             match result:

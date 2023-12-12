@@ -1,3 +1,7 @@
+"""
+CLient to controll which action is needed to navigate the robot through the pipe, turn at an RFID_tag or follow an other robot 
+"""
+
 import rclpy
 import string
 import time
@@ -20,6 +24,9 @@ from rclpy.executors import MultiThreadedExecutor
 class RobotClient(Node):
 
     def __init__(self):
+        """
+        Initialising an node with 3 ActionClients and variables needed for the logic 
+        """
         self._last_result = "Start"
         self.target_velocity_linear= 1.0
         self.target_velocity_angular = 1.0
@@ -45,7 +52,9 @@ class RobotClient(Node):
   
 
     def send_goal_move(self):
-
+        """
+        Method to send a predefined goal to an ActionServer of the action type Move 
+        """
         goal_msg = Move.Goal()
         goal_msg.target_velocity = self.target_velocity
 
@@ -54,7 +63,9 @@ class RobotClient(Node):
         self._send_goal_future.add_done_callback(self.goal_response_callback)
     
     def send_goal_follow(self):
-
+        """
+        Method to send a predefined goal to an ActionServer of the action type Follow 
+        """
         goal_msg = Follow.Goal()
         goal_msg.target_distance = self.target_distance
 
@@ -63,7 +74,9 @@ class RobotClient(Node):
         self._send_goal_future.add_done_callback(self.goal_response_callback)
     
     def send_goal_turn(self):
-
+        """
+        Method to send a predefined goal to an ActionServer of the action type Turn 
+        """
         goal_msg = Turn.Goal()
         goal_msg.target_velocity = self.target_velocity_angular
 
@@ -86,6 +99,9 @@ class RobotClient(Node):
         self._get_result_future.add_done_callback(self.get_result_callback(future))
 
     def get_result_callback(self, future):
+        """
+        Callback function in which the last result is saved and printed in the logger
+        """
         self._last_result = future.result().get_result().result.result
         self.get_logger().info('Result: {0}'.format(future.result().get_result().result.result))
         
@@ -96,6 +112,10 @@ class RobotClient(Node):
  
 
 def main(args=None):
+    """
+    Main method of the Node 
+    Sends aout goals via one of its ActionClients based on the last result or terminates when a final state is reached 
+    """
     rclpy.init(args=args) 
     try:
         client_logic = ClientLogic()

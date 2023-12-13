@@ -28,3 +28,7 @@ Testen: move, turn
  warum stürzt der client bei änderung des goals ab?
 
  Müssen target_distance und target_velocity über einen Publisher kommen?
+
+ kamera bild mit zeitstempel und triggern beim timer
+
+ 

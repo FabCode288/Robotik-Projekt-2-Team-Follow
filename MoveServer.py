@@ -64,9 +64,7 @@ class MoveServer(Node):
     def _odom_callback(self, msg):
         self._last_pose_x = msg.pose.pose.position.x
         self._last_pose_y = msg.pose.pose.position.y
-        self._last_pose_roll, 
-        self._last_pose_pitch, 
-        self._last_pose_theta = euler_from_quaternion(
+        self._last_pose_roll, self._last_pose_pitch, self._last_pose_theta = euler_from_quaternion(
             [
                 msg.pose.pose.orientation.x,
                 msg.pose.pose.orientation.y,

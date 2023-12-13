@@ -1,19 +1,18 @@
-
 import cv2 as cv
 import numpy as np
 import os
 
 class Kamera:
-
     def __init__(self):
         self.load_calibration()
         self.aruco_dict = cv.aruco.Dictionary_get(cv.aruco.DICT_6X6_250)
         self.aruco_params = cv.aruco.DetectorParameters_create()
-        self.cap = cv.VideoCapture(0)
+        self.cap = cv.VideoCapture(0) #capturing default camera feed
+        self.last_detected_distance = None # set the variable to save the last calculated distance
 
     def load_calibration(self):
         # Use the path specified in the calibration file
-        calibration_data_path = 'calib_data/calibration.npz'  # Replace with your specified path
+        calibration_data_path = 'calib_data/calibration.npz'
         print(f"Calibration file path: {calibration_data_path}")
 
         if not os.path.exists(calibration_data_path):
@@ -25,9 +24,9 @@ class Kamera:
         self.distortion_coefficients = self.calibration_data['distortion_coefficients']
         return True
 
-    def calculate_distance_continuous(self):
+    def calculate_distance(self):
         while True:
-            ret, frame = self.cap.read()
+            ret, frame = self.cap.read() #capture the frame from the camera
             if not ret:
                 print("Camera not available.")
                 break
@@ -37,18 +36,19 @@ class Kamera:
             
             corners, _, _ = cv.aruco.detectMarkers(img_gray, self.aruco_dict, parameters=self.aruco_params)
 
+                # detect Aruco markers
             if corners is not None and len(corners) > 0:
-                # Calculate distance from the camera to the ArUco marker
                 rvecs, tvecs, _ = cv.aruco.estimatePoseSingleMarkers(
                     corners, 6, self.camera_matrix, self.distortion_coefficients
-                )
-                # Calculate distance
-                distance = np.sqrt(tvecs[0][0][2] ** 2 + tvecs[0][0][0] ** 2 + tvecs[0][0][1] ** 2)
-                print(f"Distance: {distance:.2f} ")
+                ) #finding the pose of aruco marker
+
+                distance = np.sqrt(tvecs[0][0][2] ** 2 + tvecs[0][0][0] ** 2 + tvecs[0][0][1] ** 2) #calculate distance
+                self.last_detected_distance = distance #store the calculated value
+                print(f"Distance: {distance:.2f}")
             else:
                 print("No ArUco markers detected.")
+                self.last_detected_distance = None # if no aruco marker detected
 
 kamera = Kamera()
-kamera.calculate_distance_continuous()
-
+kamera.calculate_distance()
 

@@ -90,13 +90,13 @@ class TurnServer(Node):
 
     def _execute_callback(self, goal_handle):
         self.get_logger().info('Executing turn')
-        mover = RobotTurn(self._last_pose_theta)
+        mover = RobotTurn(self._last_pose_theta, goal_handle.request.target_velocity)
         #mover.set_target_pose(goal_handle.request.pose.x, goal_handle.request.pose.y, goal_handle.request.pose.theta)
-        vel = mover.turn(self._last_pose_theta, goal_handle.request.target_velocity) 
+        vel = mover.turn(self._last_pose_theta) 
         self.get_logger().info("Velocity1: {}, {}".format(vel[0], vel[1]))
         i=10 #dummy
         while(goal_handle.is_active and not goal_handle.is_cancel_requested and vel is not None and i>0 #dummy):
-            vel = mover.turn(self._last_pose_theta, goal_handle.request.target_velocity) 
+            vel = mover.turn(self._last_pose_theta) 
             self._publish_velocity(vel)
             self._publish_feedback(goal_handle, vel)
             time.sleep(0.05)

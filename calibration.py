@@ -3,7 +3,7 @@ import numpy as np
 import os
 
 class Calibration:
-    def __init__(self, image_dir_path="images", calib_data_path="../calib_data"):
+    def __init__(self, image_dir_path="/home/user/ros2_workspace/src/kamera/kamera/images", calib_data_path="/home/user/ros2_workspace/src/kamera/kamera/calib_data"):
         self.CHESS_BOARD_DIM = (9, 6) #the chessboard size
         self.SQUARE_SIZE = 25 #the size of each square
         self.criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001) #termination criteria
@@ -25,6 +25,7 @@ class Calibration:
 
         #store 3D object points and 2D image points from chessboard corners
         obj_points_3d = []
+        
         img_points_2d = []
 
         files = os.listdir(self.image_dir_path)#iterate the images
@@ -65,7 +66,7 @@ class Calibration:
         data = np.load(f"{self.calib_data_path}/calibration.npz")
         cam_matrix = data["camera_matrix"]
         dist_coef = data["distortion_coefficients"]
-        r_vector = data["rvecs"]
+        r_vector = data["rvecs"]# mit distanz zu checken
         t_vector = data["tvecs"]
 
         print("Loaded calibration data successfully")

@@ -1,31 +1,72 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float32
-from kamera_logic import Kamera  # Import Kamera class here
+import cv2 as cv
+import numpy as np
+import os
 
-class MinimalDistancePublisher(Node):
+class ArucoDistancePublisher(Node):
 
     def __init__(self):
-        super().__init__('distance_publisher')
-        self.publisher_ = self.create_publisher(Float32, 'distance_topic', 10)
-        self.kamera = Kamera()  # Initialize the Kamera class
+        super().__init__('aruco_distance_publisher')
+        self.publisher_ = self.create_publisher(Float32, 'aruco_distance', 10)
+        self.cap = cv.VideoCapture(0)
+        self.aruco_dict = cv.aruco.Dictionary_get(cv.aruco.DICT_6X6_250)
+        self.aruco_params = cv.aruco.DetectorParameters_create()
+        self.camera_matrix = None  # Placeholder for camera matrix
+        self.distortion_coefficients = None  # Placeholder for distortion coefficients
 
         timer_period = 0.2  # Publishes data every 0.2 seconds (5Hz)
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
+        # Load calibration data and set camera matrix and distortion coefficients
+        self.load_calibration_data()
+
+    def load_calibration_data(self):
+        calibration_data_path = '/home/user/ros2_workspace/src/kamera/kamera/calib_data/calibration.npz'
+        if not os.path.exists(calibration_data_path):
+            self.get_logger().warning(f"Error: Calibration file '{calibration_data_path}' not found.")
+            return
+
+        self.calibration_data = np.load(calibration_data_path)
+        self.camera_matrix = self.calibration_data['camera_matrix']
+        self.distortion_coefficients = self.calibration_data['distortion_coefficients']
+
     def timer_callback(self):
-        distance = self.kamera.last_detected_distance #use the last calculated distance
+        ret, frame = self.cap.read()  # Capture frame from the camera
+        if not ret:
+            self.get_logger().warning('No frame received.')
+            return
+
+        distance = self.calculate_distance(frame)
         if distance is not None:
-            msg = Float32() 
-            msg.data = float(distance)
-            self.publisher_.publish(msg)
-            self.get_logger().info('Publishing distance: "%s"' % msg.data)# publish the data
+            self.publish_distance(distance)
+
+    def calculate_distance(self, frame):
+        img_gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+        corners, _, _ = cv.aruco.detectMarkers(img_gray, self.aruco_dict, parameters=self.aruco_params)
+
+        if corners is not None and len(corners) > 0:
+            rvecs, tvecs, _ = cv.aruco.estimatePoseSingleMarkers(
+                corners, 6, self.camera_matrix, self.distortion_coefficients
+            )
+            distance = np.sqrt(tvecs[0][0][2] ** 2 + tvecs[0][0][0] ** 2 + tvecs[0][0][1] ** 2)
+            return distance
+        else:
+            return None
+
+    def publish_distance(self, distance):
+        msg = Float32()
+        msg.data = float(distance)
+        self.publisher_.publish(msg)
+        self.get_logger().info('Publishing distance: "%s"' % msg.data)
+
 
 def main(args=None):
     rclpy.init(args=args)
-    minimal_publisher = MinimalDistancePublisher()
-    rclpy.spin(minimal_publisher)
-    minimal_publisher.destroy_node()
+    aruco_distance_publisher = ArucoDistancePublisher()
+    rclpy.spin(aruco_distance_publisher)
+    aruco_distance_publisher.destroy_node()
     rclpy.shutdown()
 
 if __name__ == '__main__':

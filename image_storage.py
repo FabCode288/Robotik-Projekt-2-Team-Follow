@@ -8,7 +8,7 @@ class ImageStorage:
         #initialize the variables
         self.n = 0  # Number of images taken
         self.max_images = 10  # Maximum number of images to capture
-        self.image_dir_path = "images"
+        self.image_dir_path = "/home/user/ros2_workspace/src/kamera/kamera/images"
 
         #Check if the directory exists, create it if it doesn't
         CHECK_DIR = os.path.isdir(self.image_dir_path)

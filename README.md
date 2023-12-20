@@ -16,7 +16,7 @@ from mfrc522 import SimpleMFRC522
 
 Akku: 12V!!
 
-documentation?
+documentation? -> hauptsächlich im code, readme file zum starten, doxygen?, doc mit erklärung zu verfahren und warum, methoden erklären
 
 Testen: move, turn
 

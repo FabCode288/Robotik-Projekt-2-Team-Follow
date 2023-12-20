@@ -34,8 +34,16 @@ class FollowServer(Node):
         self._last_pose_pitch = 0
         self._last_pose_theta = 0
         
-
+"""
         #sub camera
+        self.aruco_distance_sub = self.create_subscription(
+            Float32,
+            'aruco_distance',
+            self._aruco_distance_callback,
+            10
+        )"""
+    
+       
 
         self.odom_sub = self.create_subscription(
             Odometry,
@@ -58,6 +66,17 @@ class FollowServer(Node):
             callback_group=ReentrantCallbackGroup()
         )
         self._goal_handle_lock = threading.Lock() #Sorgt dafür dass die Action nur von einem Thread gleichzeitig ausgeführt wird und nicht von mehreren parallel 
+"""
+    def _aruco_distance_callback(self, msg):
+        # Update the last received distance, limiting it to [0.2, 1.0]m range
+        self._last_received_distance = max(0.2, min(1.0, msg.data))
+
+        # Follow the detected robot at the last received distance
+        if self._last_received_distance >= 0.2 and self._last_received_distance <= 1.0:
+            self.get_logger().info(f'Following robot at distance: {self._last_received_distance}m')
+        else:
+            self.get_logger().info('Received distance out of bounds, default value 0.5 m')
+            self._last_received_distance = 0.5"""
 
     def _odom_callback(self, msg):
         self._last_pose_x = msg.pose.pose.position.x

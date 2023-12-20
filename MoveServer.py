@@ -156,7 +156,6 @@ class MoveServer(Node):
         result = Move.Result()
         if goal_handle.is_active and self._last_rfid_tag!="None": 
             self.get_logger().info('Move succeeded')
-            self.did_RFID_change=False
             goal_handle.succeed()
             result.result = 'RFID_reached'
         elif goal_handle.is_cancel_requested:

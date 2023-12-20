@@ -13,7 +13,7 @@ class RobotFollow:
 
     def follow(self, dist_to_robot, pitch, roll):
         try:
-            res = (dist_to_robot-self.wanted_dist)*0.01 #Faktor noch einstellen
+            res = (dist_to_robot-self.wanted_dist)*0.1 #Faktor noch einstellen
             mov = self.get_movement_pipe(pitch,roll, self.last_v, self.default_omega)
             mov[0] = mov[0]+res
             self.last_v = mov[0]

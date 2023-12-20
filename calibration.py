@@ -5,7 +5,7 @@ import os
 class Calibration:
     def __init__(self, image_dir_path="/home/user/ros2_workspace/src/kamera/kamera/images", calib_data_path="/home/user/ros2_workspace/src/kamera/kamera/calib_data"):
         self.CHESS_BOARD_DIM = (9, 6) #the chessboard size
-        self.SQUARE_SIZE = 25 #the size of each square
+        self.SQUARE_SIZE = 0.025 #the size of each square
         self.criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001) #termination criteria
         self.image_dir_path = image_dir_path # path to the directory containing images
         self.calib_data_path = calib_data_path #path to save calibration data

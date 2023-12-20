@@ -1,5 +1,6 @@
 import cv2
 import os
+import time
 
 class ImageStorage:
     def __init__(self):
@@ -46,6 +47,7 @@ class ImageStorage:
     def start_capture(self): #capture max number of images (10)
         while self.n < self.max_images:
             self.save_image()
+            time.sleep(20)
 
         self.cap.release()
 

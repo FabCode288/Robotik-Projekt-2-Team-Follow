@@ -17,7 +17,7 @@ class RobotFollow:
             self.v += res
             return self.follow_line(dist_to_line, self.v)
         elif dist_to_robot < self.wanted_dist-0.02:#beschleunigen
-            self.v -= res
+            self.v += res
             return self.follow_line(dist_to_line, self.v)
         else:#weitermachen
             return self.follow_line(dist_to_line, self.v)

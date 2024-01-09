@@ -23,5 +23,20 @@ class RobotFollow:
             return None
 
 
-    def follow_line(self, dist_to_line, v):  #selbe methode wie in move
-        pass
+    def follow_line(self, dist_to_line, v):#rechts positiv
+        if abs(self.last_dist) < abs(dist_to_line)+5 and abs(dist_to_line) > 5:
+            omega=dist_to_line*0.1 #faktor noch einstellen
+            if abs(omega) < 0.5:
+                return [v, omega]
+            else:
+                return[v, 0.5*(omega/abs(omega))]
+        elif self.last_dist-dist_to_line>20
+            omega= -0.1*dist_to_line #faktor noch einstellen
+            if abs(omega) < 0.5:
+                return [v, omega]
+            else:
+                return[v, 0.5*(omega/abs(omega))]
+        else:
+            return[v, 0]
+
+        self.last_dist = dist_to_line

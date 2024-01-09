@@ -38,6 +38,11 @@ class FollowServer(Node):
         
 
         #sub camera
+        self.robot_dist_sub = self.create_subscription(
+            Float,
+            'aruco_distance',
+            self._robot_dist_callback,
+            10)
 
         self.odom_sub = self.create_subscription(
             Odometry,
@@ -73,6 +78,9 @@ class FollowServer(Node):
             ]
         )
         #self.get_logger().info('Received odom_callback.')
+
+    def _robot_dist_callback(self, msg):
+        self.dist_to_robot = msg.data
 
 
     def _goal_callback(self, goal_request):

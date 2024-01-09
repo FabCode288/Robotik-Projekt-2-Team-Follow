@@ -10,13 +10,14 @@ class RobotFollow:
         self.last_v = v
         
     def follow(self, dist_to_robot, dist_to_line):
+        res = (dist_to_robot-self.wanted_dist)*0.1 #Faktor noch einstellen
         if dist_to_robot <= 0.2:#stop
             return [0,0]
         elif dist_to_robot > self.wanted_dist+0.02:#beschleunigen
-            self.v += 0.05
+            self.v += res
             return self.follow_line(dist_to_line, self.v)
         elif dist_to_robot < self.wanted_dist-0.02:#beschleunigen
-            self.v += 0.05
+            self.v -= res
             return self.follow_line(dist_to_line, self.v)
         else:#weitermachen
             return self.follow_line(dist_to_line, self.v)

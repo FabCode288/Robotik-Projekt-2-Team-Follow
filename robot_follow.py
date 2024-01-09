@@ -15,22 +15,22 @@ class RobotFollow:
             return [0,0]
         elif dist_to_robot > self.wanted_dist+0.02:#beschleunigen
             self.v += res
-            return self.follow_line(dist_to_line, self.v)
+            return self.follow_line(dist_to_line, self.last_v)
         elif dist_to_robot < self.wanted_dist-0.02:#beschleunigen
             self.v += res
-            return self.follow_line(dist_to_line, self.v)
+            return self.follow_line(dist_to_line, self.last_v)
         else:#weitermachen
-            return self.follow_line(dist_to_line, self.v)
+            return self.follow_line(dist_to_line, self.last_v)
         
 
-    def follow(self, dist_to_robot, dist_to_line):
-        try:
-            res = (dist_to_robot-self.wanted_dist)*0.1 #Faktor noch einstellen
-            mov = self.follow_line(dist_to_line, self.last_v+res)
-            return mov
-            self.last_v = self.last_v+res
-        except (ValueError, TypeError):
-            return None
+    # def follow(self, dist_to_robot, dist_to_line):
+    #     try:
+    #         res = (dist_to_robot-self.wanted_dist)*0.1 #Faktor noch einstellen
+    #         mov = self.follow_line(dist_to_line, self.last_v+res)
+    #         return mov
+    #         self.last_v = self.last_v+res
+    #     except (ValueError, TypeError):
+    #         return None
 
 
     def follow_line(self, dist_to_line, v):#rechts positiv

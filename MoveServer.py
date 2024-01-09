@@ -110,9 +110,9 @@ class MoveServer(Node):
     def _execute_callback(self, goal_handle):
         self.get_logger().info('Executing move')
         mover = RobotMove()         
-        vel = mover.follow_line(self._dist_to_line, 0.3)       
+        vel = mover.follow_line(self._dist_to_line, goal_handle.request.v)       
         while(goal_handle.is_active and not goal_handle.is_cancel_requested and vel is not None):
-            vel = mover.follow_line(self._dist_to_line, 0.3)
+            vel = mover.follow_line(self._dist_to_line, goal_handle.request.v)
             self._publish_velocity(vel)
             self._publish_feedback(goal_handle, vel)
             time.sleep(0.05)

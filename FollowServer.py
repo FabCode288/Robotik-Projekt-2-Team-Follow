@@ -88,7 +88,7 @@ class FollowServer(Node):
     def _robot_dist_callback(self, msg):
         self.dist_to_robot = msg.data
 
-    def _line_dist_callback(self.msg):
+    def _line_dist_callback(self, msg):
         self.dist_to_line = msg.data
 
 
@@ -118,7 +118,7 @@ class FollowServer(Node):
             vel = mover.follow(self.dist_to_robot, self.dist_to_line) 
             if vel is None:
                 i += 1
-            else
+            else:
                 self._publish_velocity(vel)
                 self._publish_calculated_feedback(goal_handle)
                 i = 0

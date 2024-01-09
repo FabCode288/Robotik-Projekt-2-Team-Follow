@@ -21,12 +21,14 @@ class MoveServer(Node):
 
     def __init__(self):
         super().__init__('move_action_server')
-        self._last_pose_x = 0
-        self._last_pose_y = 0
-        self._last_pose_roll = 0
-        self._last_pose_pitch = 0
-        self._last_pose_theta = 0
+        # Odometrie Daten werden nur Zeit von FollowLine nicht verwendet
+        #self._last_pose_x = 0
+        #self._last_pose_y = 0
+        # self._last_pose_roll = 0
+        # self._last_pose_pitch = 0
+        # self._last_pose_theta = 0
         self._last_rfid_tag = "None"
+        self._dist_to_line = 0
 
 
         self.rfid_sub = self.create_subscription(
@@ -34,16 +36,17 @@ class MoveServer(Node):
             'rfid_topic',
             self._rfid_callback,
             10)
-        self.odom_sub = self.create_subscription(
-            Odometry,
-            'odom',
-            self._odom_callback,
-            10)
-        #  self.camera_sub = self.create_subscription(
-        #     Bool,float32
-        #     'camera_topic',
-        #     self._camera_callback,
+        # self.odom_sub = self.create_subscription(
+        #     Odometry,
+        #     'odom',
+        #     self._odom_callback,
         #     10)
+
+        self.line_dist_sub = self.create_subscription(
+            Float32,
+            'line_distance',
+            self._line_dist_callback,
+            10)
 
         self._cmd_pub = self.create_publisher(Twist, 'cmd_vel', 10)
 
@@ -60,28 +63,33 @@ class MoveServer(Node):
             callback_group=ReentrantCallbackGroup()
         )
         self._goal_handle_lock = threading.Lock() #Sorgt dafür dass die Action nur von einem Thread gleichzeitig ausgeführt wird und nicht von mehreren parallel 
-
-    def _odom_callback(self, msg):
-        self._last_pose_x = msg.pose.pose.position.x
-        self._last_pose_y = msg.pose.pose.position.y
-        self._last_pose_roll, self._last_pose_pitch, self._last_pose_theta = euler_from_quaternion(
-            [
-                msg.pose.pose.orientation.x,
-                msg.pose.pose.orientation.y,
-                msg.pose.pose.orientation.z,
-                msg.pose.pose.orientation.w 
-            ]
-        )
+    # Odometrie Daten werden nur Zeit von FollowLine nicht verwendet
+    # def _odom_callback(self, msg):
+    #     self._last_pose_x = msg.pose.pose.position.x
+    #     self._last_pose_y = msg.pose.pose.position.y
+    #     self._last_pose_roll, self._last_pose_pitch, self._last_pose_theta = euler_from_quaternion(
+    #         [
+    #             msg.pose.pose.orientation.x,
+    #             msg.pose.pose.orientation.y,
+    #             msg.pose.pose.orientation.z,
+    #             msg.pose.pose.orientation.w 
+    #         ]
+    #     )
+    #     print("Roll: " + str(self._last_pose_roll))
+    #     print("Pitch: " + str(self._last_pose_pitch))
+    #     print("Theta: " + str(self._last_pose_theta))
+    #     print(msg.pose.pose.orientation.x)
+    #     print(msg.pose.pose.orientation.y)
+    #     print(msg.pose.pose.orientation.z)
+    #     print(msg.pose.pose.orientation.w)
      
     def _rfid_callback(self, msg):  
         self._last_rfid_tag = msg.data   
         self.get_logger().info('Read RFID: ' + format(msg.data))
        
-    # def _camera_callback(self,msg1,msg2):
-    #     self._last_rfid_data = self._current_rfid_data
-    #     self._current_rfid_data = msg1.data      
-    #     #self.get_logger().info('Received rfid_callback.')    
-
+    def _line_dist_callback(self, msg):
+        self._dist_to_line = msg.data   
+        self.get_logger().info('Distance to Line: ' + format(msg.data))
 
     def _goal_callback(self, goal_request):
         self.get_logger().info('Received goal request')
@@ -102,13 +110,9 @@ class MoveServer(Node):
     def _execute_callback(self, goal_handle):
         self.get_logger().info('Executing move')
         mover = RobotMove()         
-        vel = mover.get_movement_pipe(self._last_pose_pitch, self._last_pose_roll,
-                                      goal_handle.request.target_velocity[0],
-                                      goal_handle.request.target_velocity[1],self._last_rfid_tag,-1.0) #cam einfügen       
+        vel = mover.follow_line(self._dist_to_line, 0.3)       
         while(goal_handle.is_active and not goal_handle.is_cancel_requested and vel is not None):
-            vel = mover.get_movement_pipe(self._last_pose_pitch, self._last_pose_roll,
-                                          goal_handle.request.target_velocity[0],
-                                          goal_handle.request.target_velocity[1],self._last_rfid_tag,-1.0) #cam einfügen
+            vel = mover.follow_line(self._dist_to_line, 0.3)
             self._publish_velocity(vel)
             self._publish_feedback(goal_handle, vel)
             time.sleep(0.05)
@@ -156,6 +160,7 @@ class MoveServer(Node):
         result = Move.Result()
         if goal_handle.is_active and self._last_rfid_tag!="None": 
             self.get_logger().info('Move succeeded')
+            self.did_RFID_change=False
             goal_handle.succeed()
             result.result = 'RFID_reached'
         elif goal_handle.is_cancel_requested:

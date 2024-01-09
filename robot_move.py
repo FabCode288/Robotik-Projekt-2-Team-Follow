@@ -13,7 +13,7 @@ class RobotMove:
 
     def follow_line(self, dist_to_line, v):#rechts positiv
         if abs(self.last_dist) < abs(dist_to_line)+5 and abs(dist_to_line) > 5:
-            omega=dist_to_line*0.1 #faktor noch einstellen
+            omega=dist_to_line*0.01 #faktor noch einstellen
             if abs(omega) < 0.5:
                 return [v, omega]
             else:

@@ -8,6 +8,7 @@ class RobotFollow:
     def __init__(self, wanted_dist, v):
         self.wanted_dist = wanted_dist
         self.last_v = v
+        self._last_dist=0
         
     def follow(self, dist_to_robot, dist_to_line):
         res = (dist_to_robot-self.wanted_dist)*0.1 #Faktor noch einstellen

@@ -40,7 +40,7 @@ class RobotFollow:
                 return [v, omega]
             else:
                 return[v, 0.5*(omega/abs(omega))]
-        elif self.last_dist-dist_to_line>20
+        elif self.last_dist-dist_to_line>20:
             omega= -0.1*dist_to_line #faktor noch einstellen
             if abs(omega) < 0.5:
                 return [v, omega]

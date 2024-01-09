@@ -111,7 +111,7 @@ class FollowServer(Node):
     def _execute_callback(self, goal_handle):
         self.get_logger().info('Executing follow')
         mover = RobotFollow(goal_handle.request.distance, goal_handle.request.v)
-        vel = mover.follow(self.dist_to_robot, self.dist_to_line) #zu übergebende vars tbd
+        vel = mover.follow(self.dist_to_robot, self.dist_to_line) 
         self.get_logger().info("Velocity1: {}, {}".format(vel[0], vel[1])) #zu distance ändern
         i=0
         while(goal_handle.is_active and not goal_handle.is_cancel_requested and i<5):#if vel is None, wait for 5 Iterations before stopping, to compensate for lost frames

@@ -9,7 +9,15 @@ class RobotFollow:
         self.wanted_dist = wanted_dist
         self.v = v
         
-        
+    def follow(self, dist_to_robot, pitch, roll):
+        if dist_to_robot > self.wanted_dist+0.02:#beschleunigen
+            self.default_v += 0.05
+            return self.get_movement_pipe(pitch, roll, self.default_v, self.default_omega)
+        elif dist_to_robot <= self.wanted_dist:#stop
+            return [0,0]
+        else:#bremsen
+            self.default_v -= 0.05
+            return self.get_movement_pipe(pitch, roll, self.default_v, self.default_omega)
         
 
     def follow(self, dist_to_robot, dist_to_line):

@@ -39,9 +39,15 @@ class FollowServer(Node):
 
         #sub camera
         self.robot_dist_sub = self.create_subscription(
-            Float,
+            Float32,
             'aruco_distance',
             self._robot_dist_callback,
+            10)
+
+        self.line_dist_sub = self.create_subscription(
+            Float32,
+            'line_distance',
+            self._line_dist_callback,
             10)
 
         self.odom_sub = self.create_subscription(
@@ -81,6 +87,9 @@ class FollowServer(Node):
 
     def _robot_dist_callback(self, msg):
         self.dist_to_robot = msg.data
+
+    def _line_dist_callback(self.msg):
+        self.dist_to_line = msg.data
 
 
     def _goal_callback(self, goal_request):

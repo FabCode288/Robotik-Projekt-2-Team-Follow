@@ -8,6 +8,7 @@ class RobotFollow:
     def __init__(self, wanted_dist, v):
         self.wanted_dist = wanted_dist
         self.v = v
+        self.last_v = v
         
     # def follow(self, dist_to_robot, dist_to_line):
     #     if dist_to_robot > self.wanted_dist+0.02:#beschleunigen
@@ -23,8 +24,9 @@ class RobotFollow:
     def follow(self, dist_to_robot, dist_to_line):
         try:
             res = (dist_to_robot-self.wanted_dist)*0.1 #Faktor noch einstellen
-            mov = self.follow_line(dist_to_line, res)
+            mov = self.follow_line(dist_to_line, self.last_v+res)
             return mov
+            self.last_v = self.last_v+res
         except (ValueError, TypeError):
             return None
 

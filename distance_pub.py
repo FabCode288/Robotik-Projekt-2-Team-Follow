@@ -42,7 +42,7 @@ class ArucoDistancePublisher(Node):
         distance_robot = self.calculate_distance_to_robot(frame)
         if distance_robot is not None:
             self.publish_distance_robot(distance_robot)
-            
+
         distance_line = self.calculate_distance_to_line(frame)
         if distance_line is not None:
             self.publish_distance_line(distance_line)
@@ -61,8 +61,45 @@ class ArucoDistancePublisher(Node):
             return None
 
     def calculate_distance_to_line(self, frame):
-        #ToDo
-        return distance_line
+    
+        # Konvertiere das Bild in den HSV-Farbraum
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        
+        # Definiere den Farbbereich der weißen Linie
+        lower_white = np.array([0, 0, 200])
+        upper_white = np.array([255, 50, 255])
+        
+        # Extrahiere die weiße Linie im Bild
+        mask = cv2.inRange(hsv, lower_white, upper_white)
+        
+        # Finde Konturen im Bild
+        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        
+        if len(contours) > 0:
+            # Nehme die größte Kontur (Annahme: Die größte Kontur ist die Linie)
+            largest_contour = max(contours, key=cv2.contourArea)
+            
+            # Berechne den Mittelpunkt der Linie
+            M = cv2.moments(largest_contour)
+            cx = int(M['m10'] / M['m00'])
+            cy = int(M['m01'] / M['m00'])
+            
+            # Berechne die Distanz vom Mittelpunkt des Bildes zur Linie
+            distance_line = cx - (frame.shape[1] // 2)
+            
+            # Zeichne den Mittelpunkt und die Linie auf das Bild
+            #cv2.circle(frame, (cx, cy), 5, (0, 255, 0), -1)  # Mittelpunkt in grün zeichnen
+            #cv2.line(frame, (frame.shape[1] // 2, 0), (frame.shape[1] // 2, frame.shape[0]), (0, 0, 255), 2)  # Linie in rot zeichnen
+
+            # Zeige das Bild an
+            #cv2.imshow('Detected Line', frame)
+            #cv2.waitKey(0)
+            #cv2.destroyAllWindows()
+            
+            return distance_line
+        else:
+            return None
+         
 
     def publish_distance_robot(self, distance_robot):
         msg_robot = Float32()

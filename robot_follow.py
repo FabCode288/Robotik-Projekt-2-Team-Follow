@@ -5,16 +5,17 @@ import math
 
 class RobotFollow:
 
-    def __init__(self, wanted_dist, default_v, default_omega):
+    def __init__(self, wanted_dist, v, dist_to_line):
         self.wanted_dist = wanted_dist
-        self.last_v = default_v
-        self.default_omega = default_omega
+        self.v = v
+        self.dist_to_line = dist_to_line
+        
         
 
-    def follow(self, dist_to_robot, pitch, roll):
+    def follow(self, dist_to_robot):
         try:
             res = (dist_to_robot-self.wanted_dist)*0.1 #Faktor noch einstellen
-            mov = self.get_movement_pipe(pitch,roll, self.last_v, self.default_omega)
+            mov = self.follow_line(self.dist_to_line, self.v)
             mov[0] = mov[0]+res
             self.last_v = mov[0]
             return mov
@@ -22,12 +23,5 @@ class RobotFollow:
             return None
 
 
-    def get_movement_pipe(self, pitch, roll, v, omega):  
-        if(abs(pitch) > abs(roll) + 0.1):
-            if roll> 0:
-                return [0, -omega]
-            else:
-                return [0, omega]
-        else:
-            return [math.cos(abs(roll)) * v, -1 * math.sin(roll) * omega]
-  
+    def follow_line(self, dist_to_line, v):  #selbe methode wie in move
+        pass

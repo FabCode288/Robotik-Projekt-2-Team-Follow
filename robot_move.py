@@ -37,7 +37,7 @@ class RobotMove:
             return [math.cos(abs(roll)) * v, -1 * math.sin(roll) * omega]
     """
     def follow_line(self, dist_to_line, v):#rechts positiv
-        if self.last_dist < dist_to_line and dist_to_line > 20:
+        if abs(self.last_dist) < abs(dist_to_line) and abs(dist_to_line) > 20:
             omega=dist_to_line*0.1 #faktor noch einstellen
             if abs(omega) < 0.5:
                 return [v, omega]

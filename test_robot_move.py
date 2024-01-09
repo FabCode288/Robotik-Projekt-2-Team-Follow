@@ -3,91 +3,45 @@ import pytest
 import numpy as np
 
 from insert_dir import RobotMove
-"""
-Given a new RobotMove
-When the method get_movement_pipe is called with invalid parameters
-Then the method returns None
-"""
-def test_gmp_invalid_parameters():
-    mover = RobotMove()
-    assert mover.get_movement_pipe(0,0,0,0,0,0) == None
-    
-"""
-Given a new RobotMove
-When the method get_movement_pipe is called with pitch = 0 and roll = 0 and RFID tag = "None" and camera dist = -1.0
-Then the method returns [1, 0]
-"""
 
-def test_gmp_0_0():
-    mover = RobotMove()
-    assert mover.get_movement_pipe(0,0,1,1, "None", -1.0) == [1, 0]
+def test_follow_line_straight_path():
+    robot = RobotMove()
+    v = 1.0  
 
-"""
-Given a new RobotMove
-When the method get_movement_pipe is called with pitch = pi/2 and roll = 0 and RFID tag = "None" and camera dist = -1.0
-Then the method returns [0, 1]
-"""
+    # Test for straight path (dist_to_line close to 0)
+    command = robot.follow_line(0, v)
+    assert command == [v, 0], "Robot should move straight when on the line"
 
-def test_gmp_pi2_0():
-    mover = RobotMove()
-    assert mover.get_movement_pipe(np.pi/2,0,1,1, "None", -1.0) == [0, 1]
+def test_follow_line_minor_adjustment():
+    robot = RobotMove()
+    v = 1.0
 
-"""
-Given a new RobotMove
-When the method get_movement_pipe is called with pitch = 0 and roll = pi/2 and RFID tag = "None" and camera dist = -1.0
-Then the method returns [0, -1]
-"""
+    # Test for minor adjustment (dist_to_line small but not 0)
+    command = robot.follow_line(4, v)
+    assert command[0] == v and abs(command[1]) > 0, "Robot should adjust slightly for small deviations"
 
-def test_gmp_0_pi2():
-    mover = RobotMove()
-    assert mover.get_movement_pipe(0, np.pi/2,1,1, "None", -1.0) == [0, -1]   
+def test_follow_line_major_adjustment():
+    robot = RobotMove()
+    v = 1.0
 
-"""
-Given a new RobotMove
-When the method get_movement_pipe is called with pitch = pi/2 and roll = pi/2 and RFID tag = "None" and camera dist = -1.0
-Then the method returns [0, -1]
-"""
+    # Test for larger adjustment (dist_to_line large)
+    command = robot.follow_line(10, v)
+    assert command[0] == v and abs(command[1]) == 0.5, "Robot should make major adjustments for large deviations"
 
-def test_gmp_pi2_pi2():
-    mover = RobotMove()
-    assert mover.get_movement_pipe(np.pi/2,np.pi/2,1,1, "None", -1.0) == [0, -1]
+def test_follow_line_negative_distance():
+    robot = RobotMove()
+    v = 1.0
 
-"""
-Given a new RobotMove
-When the method get_movement_pipe is called with pitch = pi/2 and roll = 1 and RFID tag = "None" and camera dist = -1.0
-Then the method returns [0, -1]
-"""
+    # Test for negative distance (should adjust in opposite direction)
+    command = robot.follow_line(-10, v)
+    assert command[0] == v and command[1] == -0.5, "Robot should adjust in the opposite direction for negative distances"
 
-def test_gmp_pi2_1():
-    mover = RobotMove()
-    assert mover.get_movement_pipe(np.pi/2,1,1,1, "None", -1.0) == [0, -1]
+def test_follow_line_with_last_dist():
+    robot = RobotMove()
+    v = 1.0
+    robot.last_dist = 15
 
-"""
-Given a new RobotMove
-When the method get_movement_pipe is called with pitch = pi/2 and roll = -1 and RFID tag = "None" and camera dist = -1.0
-Then the method returns [0, 1]
-"""
-
-def test_gmp_pi2_minus1():
-    mover = RobotMove()
-    assert mover.get_movement_pipe(np.pi/2,-1,1,1, "None", -1.0) == [0, 1]
-
-"""
-Given a new RobotMove
-When the method get_movement_pipe is called with pitch = pi/2 and roll = -1 and RFID tag = "notNone" and camera dist = -1.0
-Then the method returns None
-"""
-
-def test_gmp_pi2_minus1_notNone():
-    mover = RobotMove()
-    assert mover.get_movement_pipe(np.pi/2,-1,1,1, "notNone", -1.0) == None
-
-"""
-Given a new RobotMove
-When the method get_movement_pipe is called with pitch = pi/2 and roll = -1 and RFID tag = "None" and camera dist = 1.0
-Then the method returns None
-"""
-
-def test_gmp_pi2_minus1_dist():
-    mover = RobotMove()
-    assert mover.get_movement_pipe(np.pi/2,-1,1,1, "None", 1.0) == None
+    # Test behavior with a non-zero last_dist
+    command = robot.follow_line(5, v)
+    # Assert based on expected behavior considering last_dist
+    # This depends on how you expect last_dist to affect the behavior

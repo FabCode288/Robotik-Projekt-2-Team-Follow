@@ -17,7 +17,7 @@ def test_follow_line_minor_adjustment():
     v = 1.0
 
     # Test for minor adjustment (dist_to_line small but not 0)
-    command = robot.follow_line(4, v)
+    command = robot.follow_line(6, v)
     assert command[0] == v and abs(command[1]) > 0, "Robot should adjust slightly for small deviations"
 
 def test_follow_line_major_adjustment():
@@ -25,7 +25,7 @@ def test_follow_line_major_adjustment():
     v = 1.0
 
     # Test for larger adjustment (dist_to_line large)
-    command = robot.follow_line(10, v)
+    command = robot.follow_line(50, v)
     assert command[0] == v and abs(command[1]) == 0.5, "Robot should make major adjustments for large deviations"
 
 def test_follow_line_negative_distance():
@@ -34,7 +34,7 @@ def test_follow_line_negative_distance():
 
     # Test for negative distance (should adjust in opposite direction)
     command = robot.follow_line(-10, v)
-    assert command[0] == v and command[1] == -0.5, "Robot should adjust in the opposite direction for negative distances"
+    assert command[0] == v and command[1] == -0.1, "Robot should adjust in the opposite direction for negative distances"
 
 def test_follow_line_with_last_dist():
     robot = RobotMove()

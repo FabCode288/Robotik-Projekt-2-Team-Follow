@@ -5,17 +5,17 @@ import math
 
 class RobotFollow:
 
-    def __init__(self, wanted_dist, v, dist_to_line):
+    def __init__(self, wanted_dist, v):
         self.wanted_dist = wanted_dist
         self.v = v
-        self.dist_to_line = dist_to_line
+        
         
         
 
-    def follow(self, dist_to_robot):
+    def follow(self, dist_to_robot, dist_to_line):
         try:
             res = (dist_to_robot-self.wanted_dist)*0.1 #Faktor noch einstellen
-            mov = self.follow_line(self.dist_to_line, self.v)
+            mov = self.follow_line(dist_to_line, self.v)
             mov[0] = mov[0]+res
             self.last_v = mov[0]
             return mov

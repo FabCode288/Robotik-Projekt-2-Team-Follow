@@ -7,7 +7,6 @@ class RobotFollow:
 
     def __init__(self, wanted_dist, v):
         self.wanted_dist = wanted_dist
-        self.v = v
         self.last_v = v
         
     # def follow(self, dist_to_robot, dist_to_line):

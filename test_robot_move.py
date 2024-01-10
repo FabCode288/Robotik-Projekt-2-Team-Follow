@@ -6,7 +6,7 @@ from insert_dir import RobotMove
 
 def test_follow_line_straight_path():
     robot = RobotMove()
-    v = 1.0  
+    v = 0.1  
 
     # Test for straight path (dist_to_line close to 0)
     command = robot.follow_line(0, v)
@@ -14,7 +14,7 @@ def test_follow_line_straight_path():
 
 def test_follow_line_minor_adjustment():
     robot = RobotMove()
-    v = 1.0
+    v = 0.1
 
     # Test for minor adjustment (dist_to_line small but not 0)
     command = robot.follow_line(6, v)
@@ -22,7 +22,7 @@ def test_follow_line_minor_adjustment():
 
 def test_follow_line_major_adjustment():
     robot = RobotMove()
-    v = 1.0
+    v = 0.1
 
     # Test for larger adjustment (dist_to_line large)
     command = robot.follow_line(50, v)
@@ -30,7 +30,7 @@ def test_follow_line_major_adjustment():
 
 def test_follow_line_negative_distance():
     robot = RobotMove()
-    v = 1.0
+    v = 0.1
 
     # Test for negative distance (should adjust in opposite direction)
     command = robot.follow_line(-10, v)
@@ -38,7 +38,7 @@ def test_follow_line_negative_distance():
 
 def test_follow_line_with_last_dist():
     robot = RobotMove()
-    v = 1.0
+    v = 0.1
     robot.last_dist = 15
 
     # Test behavior with a non-zero last_dist

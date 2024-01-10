@@ -136,9 +136,6 @@ class FollowServer(Node):
             velocity_msg.linear.x = vel[0] 
             self._cmd_pub.publish(velocity_msg)
 
-    def _dist_to_robot(self, goal_handle):
-        return 2    #calculate dist to robot
-
     def _publish_calculated_feedback(self, goal_handle):
         feedback_msg = Follow.Feedback()
         feedback_msg.dist_to_robot = self._dist_to_robot(goal_handle)

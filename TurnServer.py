@@ -81,8 +81,8 @@ class TurnServer(Node):
         self.get_logger().info('Executing turn')
         mover = RobotTurn(self._last_pose_theta, goal_handle.request.target_velocity)
         vel = mover.turn(self._last_pose_theta) 
-        self.get_logger().info("Velocity1: {}, {}".format(vel[0], vel[1]))
-        while (goal_handle.is_active and not goal_handle.is_cancel_requested and (vel is not None or vel == [0,0])):
+        self.get_logger().info("Velocity: {}, {}".format(vel[0], vel[1]))
+        while (goal_handle.is_active and not goal_handle.is_cancel_requested and vel is not None):
             vel = mover.turn(self._last_pose_theta) 
             self._publish_velocity(vel)
             self._publish_feedback(goal_handle, vel)
@@ -91,12 +91,15 @@ class TurnServer(Node):
         return self._determine_action_result(goal_handle, vel)
 
     def _publish_velocity(self, vel):
+        velocity_msg = Twist() 
         if(vel is not None):
-            velocity_msg = Twist()
-            self.get_logger().info("Velocity: {}, {}".format(vel[0], vel[1]))
+            self.get_logger().info("Velocity: {}, {}".format(vel[0], vel[1]) )
             velocity_msg.angular.z = float(vel[1])
             velocity_msg.linear.x = float(vel[0]) 
-            self._cmd_pub.publish(velocity_msg)
+        else:
+            velocity_msg.angular.z = float(0.0)
+            velocity_msg.linear.x = float(0.0) 
+        self._cmd_pub.publish(velocity_msg) 
 
 
     def _publish_feedback(self, goal_handle, vel):

@@ -26,23 +26,23 @@ def test_follow_30_0():
 """
 Given a new RobotFollow with wanted dist 30 
 When the method follow is called with parameters 40 0
-Then the method returns [<0.5, 0]
+Then the method returns [>0.5, 0]
 """
 def test_follow_30_0():
     mover = RobotFollow(30)
     command = mover.follow(40,0)
-    assert command[0] < 0.5
+    assert command[0] > 0.5
     assert command[1] == 0
 
 """
 Given a new RobotFollow with wanted dist 30 
 When the method follow is called with parameters 25 0
-Then the method returns [>0.5, 0]
+Then the method returns [<0.5, 0]
 """
 def test_follow_30_0():
     mover = RobotFollow(30)
     command = mover.follow(25,0)
-    assert command[0] > 0.5
+    assert command[0] < 0.5
     assert command[1] == 0
 
 """

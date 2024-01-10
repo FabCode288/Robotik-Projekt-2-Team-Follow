@@ -39,13 +39,13 @@ class FollowServer(Node):
 
         #sub camera
         self.robot_dist_sub = self.create_subscription(
-            Float32,
+            float,
             'aruco_distance',
             self._robot_dist_callback,
             10)
 
         self.line_dist_sub = self.create_subscription(
-            Float32,
+            float,
             'line_distance',
             self._line_dist_callback,
             10)

@@ -138,7 +138,7 @@ class FollowServer(Node):
 
     def _publish_calculated_feedback(self, goal_handle):
         feedback_msg = Follow.Feedback()
-        feedback_msg.dist_to_robot = self._dist_to_robot(goal_handle)
+        feedback_msg.dist_to_robot = self.dist_to_robot
         goal_handle.publish_feedback(feedback_msg)
 
     def _determine_action_result(self, goal_handle):

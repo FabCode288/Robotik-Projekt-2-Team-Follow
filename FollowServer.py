@@ -17,6 +17,7 @@ from rclpy.node import Node
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
 from tf_transformations import euler_from_quaternion
+from std_msgs.msg import Float32
 
 from ro36_interfaces.action import Follow
 from rclpy.action import CancelResponse, GoalResponse
@@ -28,28 +29,21 @@ class FollowServer(Node):
 
     def __init__(self):
         super().__init__('follow_action_server')
-
         self.dist_to_line = 0
         self.dist_to_robot = 0
+        self.i=0
 
-        #sub camera
         self.robot_dist_sub = self.create_subscription(
-            float,
+            Float32,
             'aruco_distance',
             self._robot_dist_callback,
             10)
 
         self.line_dist_sub = self.create_subscription(
-            float,
+            Float32,
             'line_distance',
             self._line_dist_callback,
             10)
-
-        # self.odom_sub = self.create_subscription(
-        #     Odometry,
-        #     'odom',
-        #     self._odom_callback,
-        #     10)
 
         self._cmd_pub = self.create_publisher(Twist, 'cmd_vel', 10)
 
@@ -67,30 +61,11 @@ class FollowServer(Node):
         )
         self._goal_handle_lock = threading.Lock() #Sorgt dafür dass die Action nur von einem Thread gleichzeitig ausgeführt wird und nicht von mehreren parallel 
 
-    # def _odom_callback(self, msg):
-    #     self._last_pose_x = msg.pose.pose.position.x
-    #     self._last_pose_y = msg.pose.pose.position.y
-    #     self._last_pose_roll, self._last_pose_pitch, self._last_pose_theta = euler_from_quaternion(
-    #         [
-    #             msg.pose.pose.orientation.x,
-    #             msg.pose.pose.orientation.y,
-    #             msg.pose.pose.orientation.z,
-    #             msg.pose.pose.orientation.w 
-    #         ]
-    #     )
-        #self.get_logger().info('Received odom_callback.')
-
     def _robot_dist_callback(self, msg):
-        if msg.data > 0:  
-            self.dist_to_robot = msg.data
-        else:
-            self.dist_to_robot = None
+        self.dist_to_robot = msg.data
 
     def _line_dist_callback(self, msg):
-        if msg.data < 5000:  #a value bigger than 5000 means, that we detect no white line. In that case the dist is set to None 
-            self.dist_to_line = msg.data
-        else:
-            self.dist_to_line = None
+        self.dist_to_line = msg.data
 
 
     def _goal_callback(self, goal_request):
@@ -111,40 +86,47 @@ class FollowServer(Node):
 
     def _execute_callback(self, goal_handle):
         self.get_logger().info('Executing follow')
-        mover = RobotFollow(goal_handle.request.distance, goal_handle.request.v)
+        mover = RobotFollow(goal_handle.request.distance)
         vel = mover.follow(self.dist_to_robot, self.dist_to_line) 
-        self.get_logger().info("Velocity1: {}, {}".format(vel[0], vel[1])) #zu distance ändern
-        i=0
-        while(goal_handle.is_active and not goal_handle.is_cancel_requested and i<10):#if vel is None, wait for 5 Iterations before stopping, to compensate for lost frames
+        self.get_logger().info("Velocity: {}, {}".format(vel[0], vel[1])) #zu distance ändern
+        self.i=0
+        while(goal_handle.is_active and not goal_handle.is_cancel_requested and self.i<50):#if vel is None, wait for 50 Iterations before stopping, to compensate for lost frames
             vel = mover.follow(self.dist_to_robot, self.dist_to_line) 
-            if self.dist_to_robot is None or self.dist_to_line:
-                i += 1
+            if self.dist_to_robot==-1.0:
+                self.i += 1
             else:
                 self._publish_velocity(vel)
-                self._publish_calculated_feedback(goal_handle)
-                i = 0
-                time.sleepms(50)
+                self._publish_feedback(goal_handle,vel)
+                self.i = 0
+                time.sleep(0.05)
                 
         self._publish_velocity(None)
         return self._determine_action_result(goal_handle)
 
     def _publish_velocity(self, vel):
+        velocity_msg = Twist() 
         if(vel is not None):
-            velocity_msg = Twist()
             self.get_logger().info("Velocity: {}, {}".format(vel[0], vel[1]) )
+            velocity_msg.angular.z = float(vel[1])
+            velocity_msg.linear.x = float(vel[0]) 
+        else:
+            velocity_msg.angular.z = float(0.0)
+            velocity_msg.linear.x = float(0.0) 
+        self._cmd_pub.publish(velocity_msg) 
+
+    def _publish_feedback(self, goal_handle, vel):
+        if(vel is not None):
+            feedback_msg = Follow.Feedback()
+            velocity_msg = Twist()            
             velocity_msg.angular.z = vel[1]
             velocity_msg.linear.x = vel[0] 
-            self._cmd_pub.publish(velocity_msg)
-
-    def _publish_calculated_feedback(self, goal_handle):
-        feedback_msg = Follow.Feedback()
-        feedback_msg.dist_to_robot = self.dist_to_robot
-        goal_handle.publish_feedback(feedback_msg)
+            feedback_msg.current_velocity = velocity_msg
+            goal_handle.publish_feedback(feedback_msg)
 
     def _determine_action_result(self, goal_handle):
         result = Follow.Result()
-        if goal_handle.is_active and self.dist_to_robot == None:
-            self.get_logger().info('Follow succeeded') #erst nach wiederholtem aufruf successful
+        if goal_handle.is_active and self.i>=50:
+            self.get_logger().info('Follow succeeded') 
             goal_handle.succeed()
             result.reached = True
         elif goal_handle.is_cancel_requested:

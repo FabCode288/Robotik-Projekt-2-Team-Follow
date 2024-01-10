@@ -3,7 +3,7 @@ import math
 
 class RobotFollow:
 
-    def __init__(self, wanted_dist:
+    def __init__(self, wanted_dist):
         self.wanted_dist = wanted_dist
         self.last_v = 0.1
         

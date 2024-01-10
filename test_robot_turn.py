@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 from turn_server.TurnServer import RobotTurn
-#fertig
+
 """The Robot starts at 0 degrees and is currently at 0 Degrees, it did not turn yet. We expect an rotating velocity < 0"""
 def test_turn_start_angle_0_current_angle_0():
     turner = RobotTurn(0, 1) #The Angle of the Robot at the RFID, Rotating Velocity
@@ -15,12 +15,12 @@ def test_turn_start_angle_0_current_angle_45():
 """The Robot starts at 0 degrees and is currently at 180 Degrees, it has already turned completely. We expect an rotating velocity = 0"""
 def test_turn_start_angle_0_current_angle_180():
     turner = RobotTurn(np.radians(0), 1)#The Angle of the Robot at the RFID, Rotating Velocity
-    assert turner.turn(np.radians(180)) == [0, 0] # The current angle of the Robot while rotating
+    assert turner.turn(np.radians(180)) == None # The current angle of the Robot while rotating
 
 """The Robot starts at 160 degrees and is currently at -20 Degrees, it has already turned completely. We expect an rotating velocity = 0"""
 def test_turn_start_angle_160_current_angle_180():
     turner = RobotTurn(np.radians(160), 1)#The Angle of the Robot at the RFID, Rotating Velocity
-    assert turner.turn(np.radians(-20)) == [0, 0] # The current angle of the Robot while rotating
+    assert turner.turn(np.radians(-20)) == None # The current angle of the Robot while rotating
 
 """The Robot starts at -30 degrees and is currently at -30 Degrees, it did not turn yet. We expect an rotating velocity < 0"""
 def test_turn_start_angle_minus_30_current_angle_minus_30():

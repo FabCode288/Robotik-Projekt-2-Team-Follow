@@ -11,7 +11,7 @@ class RobotFollow:
         self._last_dist=0
         
     def follow(self, dist_to_robot, dist_to_line):
-        res = (dist_to_robot-self.wanted_dist)*0.1 #Faktor noch einstellen
+        res = (dist_to_robot-self.wanted_dist)*0.01 #Faktor noch einstellen
         if dist_to_robot <= 0.2:#stop
             return [0,0]
         elif dist_to_robot > self.wanted_dist+0.02:#beschleunigen

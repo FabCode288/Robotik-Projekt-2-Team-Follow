@@ -26,18 +26,4 @@ class RobotTurn():
         except:
             return None
         
-        
-       
-        
-        
-
-            
-
-
-        
- 
-        
-        # mover = SimpleRobotMover()
-        #mover.set_target_pose(goal_handle.request.pose.x, goal_handle.request.pose.y, goal_handle.request.pose.theta)
-        #vel = mover.turn(self, _last_pose_pitch, _last_pose_roll) #inputs tbd
-        # self.get_logger().info("Velocity1: {}, {}".format(vel[0], vel[1]))
+    

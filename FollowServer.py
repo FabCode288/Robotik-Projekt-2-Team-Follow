@@ -35,7 +35,7 @@ class FollowServer(Node):
         self._last_pose_theta = 0
 
         self.dist_to_line = 0
-        
+        self.dist_to_robot = 0
 
         #sub camera
         self.robot_dist_sub = self.create_subscription(

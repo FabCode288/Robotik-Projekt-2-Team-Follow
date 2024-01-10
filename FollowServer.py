@@ -28,11 +28,6 @@ class FollowServer(Node):
 
     def __init__(self):
         super().__init__('follow_action_server')
-        self._last_pose_x = 0
-        self._last_pose_y = 0
-        self._last_pose_roll = 0
-        self._last_pose_pitch = 0
-        self._last_pose_theta = 0
 
         self.dist_to_line = 0
         self.dist_to_robot = 0
@@ -50,11 +45,11 @@ class FollowServer(Node):
             self._line_dist_callback,
             10)
 
-        self.odom_sub = self.create_subscription(
-            Odometry,
-            'odom',
-            self._odom_callback,
-            10)
+        # self.odom_sub = self.create_subscription(
+        #     Odometry,
+        #     'odom',
+        #     self._odom_callback,
+        #     10)
 
         self._cmd_pub = self.create_publisher(Twist, 'cmd_vel', 10)
 
@@ -72,24 +67,27 @@ class FollowServer(Node):
         )
         self._goal_handle_lock = threading.Lock() #Sorgt dafür dass die Action nur von einem Thread gleichzeitig ausgeführt wird und nicht von mehreren parallel 
 
-    def _odom_callback(self, msg):
-        self._last_pose_x = msg.pose.pose.position.x
-        self._last_pose_y = msg.pose.pose.position.y
-        self._last_pose_roll, self._last_pose_pitch, self._last_pose_theta = euler_from_quaternion(
-            [
-                msg.pose.pose.orientation.x,
-                msg.pose.pose.orientation.y,
-                msg.pose.pose.orientation.z,
-                msg.pose.pose.orientation.w 
-            ]
-        )
+    # def _odom_callback(self, msg):
+    #     self._last_pose_x = msg.pose.pose.position.x
+    #     self._last_pose_y = msg.pose.pose.position.y
+    #     self._last_pose_roll, self._last_pose_pitch, self._last_pose_theta = euler_from_quaternion(
+    #         [
+    #             msg.pose.pose.orientation.x,
+    #             msg.pose.pose.orientation.y,
+    #             msg.pose.pose.orientation.z,
+    #             msg.pose.pose.orientation.w 
+    #         ]
+    #     )
         #self.get_logger().info('Received odom_callback.')
 
     def _robot_dist_callback(self, msg):
         self.dist_to_robot = msg.data
 
     def _line_dist_callback(self, msg):
-        self.dist_to_line = msg.data
+        if msg.data < 5000:  #a value bigger than 5000 means, that we detect no white line. In that case the dist is set to None 
+            self.dist_to_line = msg.data
+        else:
+            self.dist_to_line = None
 
 
     def _goal_callback(self, goal_request):

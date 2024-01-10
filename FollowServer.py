@@ -146,7 +146,7 @@ class FollowServer(Node):
 
     def _determine_action_result(self, goal_handle):
         result = Follow.Result()
-        if goal_handle.is_active and self._dist_to_robot(goal_handle) == None:
+        if goal_handle.is_active and self.dist_to_robot == None:
             self.get_logger().info('Follow succeeded') #erst nach wiederholtem aufruf successful
             goal_handle.succeed()
             result.reached = True

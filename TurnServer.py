@@ -1,11 +1,3 @@
-#Start Befehl
-#ros2 run ro36_simple_mover_server Ro36SimpleMoverServer
-#Send empty Msg
-#ros2 action send_goal -f /go_to ro36_interfaces/action/GoTo "{}"
-#Send full Msg
-#ros2 action send_goal -f /go_to ro36_interfaces/action/GoTo "{pose: {x: 4.0, y: 4.0, theta: 0.0}}"
-#source install/setup.bash
-
 import rclpy
 import math
 import time
@@ -54,7 +46,8 @@ class TurnServer(Node):
             cancel_callback=self._cancel_callback,
             callback_group=ReentrantCallbackGroup()
         )
-        self._goal_handle_lock = threading.Lock() #Sorgt dafür dass die Action nur von einem Thread gleichzeitig ausgeführt wird und nicht von mehreren parallel 
+        self._goal_handle_lock = threading.Lock() #Sorgt dafür dass die Action nur von einem Thread gleichzeitig ausgeführt wird 
+                                                  #und nicht von mehreren parallel 
 
     def _odom_callback(self, msg):
         self._last_pose_x = msg.pose.pose.position.x
@@ -67,8 +60,6 @@ class TurnServer(Node):
                 msg.pose.pose.orientation.w 
             ]
         )
-        #self.get_logger().info('Received odom_callback.')
-
 
     def _goal_callback(self, goal_request):
         self.get_logger().info('Received goal request with target turn')
@@ -89,16 +80,13 @@ class TurnServer(Node):
     def _execute_callback(self, goal_handle):
         self.get_logger().info('Executing turn')
         mover = RobotTurn(self._last_pose_theta, goal_handle.request.target_velocity)
-        #mover.set_target_pose(goal_handle.request.pose.x, goal_handle.request.pose.y, goal_handle.request.pose.theta)
         vel = mover.turn(self._last_pose_theta) 
         self.get_logger().info("Velocity1: {}, {}".format(vel[0], vel[1]))
-        i=10 #dummy
-        while(goal_handle.is_active and not goal_handle.is_cancel_requested and vel is not None and i>0 #dummy):
+        while (goal_handle.is_active and not goal_handle.is_cancel_requested and (vel is not None or vel == [0,0])):
             vel = mover.turn(self._last_pose_theta) 
             self._publish_velocity(vel)
             self._publish_feedback(goal_handle, vel)
             time.sleep(0.05)
-            i=i-1#dummy
         self._publish_velocity(None)
         return self._determine_action_result(goal_handle, vel)
 
@@ -121,7 +109,7 @@ class TurnServer(Node):
 
     def _determine_action_result(self, goal_handle, vel):
         result = Turn.Result()
-        if True:
+        if goal_handle.is_active and vel ==[0,0]:
             self.get_logger().info('Turn succeeded')
             goal_handle.succeed()
             result.result = "Turn_succesfull"
@@ -139,9 +127,9 @@ class TurnServer(Node):
 
 def main():
     rclpy.init()
+    robot_mover_executor = MultiThreadedExecutor(2)
+    turn_server = TurnServer()
     try:
-        robot_mover_executor = MultiThreadedExecutor(2)
-        turn_server = TurnServer()
         rclpy.spin(node=turn_server, executor=robot_mover_executor)
     finally:
         turn_server.destroy_node()

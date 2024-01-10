@@ -10,5 +10,14 @@ Testen: move, follow
 
  Fragen: 
 
-TurnServer final bei Fabi -> Anpassung auf Logik Änderung notwendig -> None bei falschen Eingaben, [0,0] bei fertiger Drehung
+Turn Server logik + tests mit Doku
+Follow Regelung -> Beleuchtung!!
+Follow Server
+follow tests 
+
+
+TODO:
+RFID Sensor
+Linie Regelung fragwürdig
+Client keine Mail bekommen
  

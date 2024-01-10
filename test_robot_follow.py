@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from robot_follow import RobotFollow 
+from follow_server.robot_follow import RobotFollow 
 
 """
 Given a new RobotFollow with wanted dist 30 dist to line 0

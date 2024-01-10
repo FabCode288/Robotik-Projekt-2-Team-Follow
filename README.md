@@ -10,4 +10,5 @@ Testen: move, follow
 
  Fragen: 
 
+TurnServer final bei Fabi -> Anpassung auf Logik Änderung notwendig -> None bei falschen Eingaben, [0,0] bei fertiger Drehung
  

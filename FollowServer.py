@@ -81,7 +81,7 @@ class FollowServer(Node):
         #self.get_logger().info('Received odom_callback.')
 
     def _robot_dist_callback(self, msg):
-        if msg.data < 5000:  #a value bigger than 5000 means, that we detect no robot. In that case the dist is set to None 
+        if msg.data > 0:  
             self.dist_to_robot = msg.data
         else:
             self.dist_to_robot = None
@@ -115,9 +115,9 @@ class FollowServer(Node):
         vel = mover.follow(self.dist_to_robot, self.dist_to_line) 
         self.get_logger().info("Velocity1: {}, {}".format(vel[0], vel[1])) #zu distance ändern
         i=0
-        while(goal_handle.is_active and not goal_handle.is_cancel_requested and i<5):#if vel is None, wait for 5 Iterations before stopping, to compensate for lost frames
+        while(goal_handle.is_active and not goal_handle.is_cancel_requested and i<10):#if vel is None, wait for 5 Iterations before stopping, to compensate for lost frames
             vel = mover.follow(self.dist_to_robot, self.dist_to_line) 
-            if vel is None:
+            if self.dist_to_robot is None or self.dist_to_line:
                 i += 1
             else:
                 self._publish_velocity(vel)

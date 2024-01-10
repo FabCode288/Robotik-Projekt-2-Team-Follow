@@ -81,7 +81,10 @@ class FollowServer(Node):
         #self.get_logger().info('Received odom_callback.')
 
     def _robot_dist_callback(self, msg):
-        self.dist_to_robot = msg.data
+        if msg.data < 5000:  #a value bigger than 5000 means, that we detect no robot. In that case the dist is set to None 
+            self.dist_to_robot = msg.data
+        else:
+            self.dist_to_robot = None
 
     def _line_dist_callback(self, msg):
         if msg.data < 5000:  #a value bigger than 5000 means, that we detect no white line. In that case the dist is set to None 

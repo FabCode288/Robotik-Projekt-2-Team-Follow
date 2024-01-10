@@ -19,5 +19,6 @@ follow tests
 TODO:
 RFID Sensor
 Linie Regelung fragwürdig
+Linie Kamera stürtzt ab
 Client keine Mail bekommen
  

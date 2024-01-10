@@ -161,12 +161,12 @@ class FollowServer(Node):
 
 def main():
     rclpy.init()
+    robot_mover_executor = MultiThreadedExecutor(4)
+    follow_server = FollowServer()
     try:
-        robot_mover_executor = MultiThreadedExecutor(4)
-        simple_mover_server = FollowServer()
-        rclpy.spin(node=simple_mover_server, executor=robot_mover_executor)
+        rclpy.spin(node=follow_server, executor=robot_mover_executor)
     finally:
-        simple_mover_server.destroy_node()
+        follow_server.destroy_node()
         rclpy.shutdown()
 
 

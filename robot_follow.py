@@ -3,9 +3,9 @@ import math
 
 class RobotFollow:
 
-    def __init__(self, wanted_dist, v):
+    def __init__(self, wanted_dist:
         self.wanted_dist = wanted_dist
-        self.last_v = v
+        self.last_v = 0.1
         
     def follow(self, dist_to_robot, dist_to_line):
         res = (dist_to_robot-self.wanted_dist)*0.001 #Faktor noch einstellen

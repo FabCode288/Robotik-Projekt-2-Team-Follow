@@ -86,6 +86,7 @@ class FollowServer(Node):
 
     def _execute_callback(self, goal_handle):
         self.get_logger().info('Executing follow')
+        self.get_logger().info("Distance to Robot: {}".format(self.dist_to_robot))
         mover = RobotFollow(goal_handle.request.distance)
         vel = mover.follow(self.dist_to_robot, self.dist_to_line) 
         self.get_logger().info("Velocity: {}, {}".format(vel[0], vel[1])) #zu distance ändern

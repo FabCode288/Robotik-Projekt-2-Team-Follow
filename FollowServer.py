@@ -119,8 +119,8 @@ class FollowServer(Node):
         if(vel is not None):
             feedback_msg = Follow.Feedback()
             velocity_msg = Twist()            
-            velocity_msg.angular.z = vel[1]
-            velocity_msg.linear.x = vel[0] 
+            velocity_msg.angular.z = float(vel[1])
+            velocity_msg.linear.x = float(vel[0]) 
             feedback_msg.current_velocity = velocity_msg
             goal_handle.publish_feedback(feedback_msg)
 

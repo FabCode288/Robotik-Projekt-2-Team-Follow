@@ -14,13 +14,15 @@ Turn Server logik + tests mit Doku
 Follow Regelung -> Beleuchtung!!
 Follow Server
 follow tests 
+Move Server
+Move tests
+
 
 
 TODO:
 RFID Sensor
-Linie Regelung fragwürdig
-Linie Kamera stürtzt ab
-Client keine Mail bekommen
+
+Move Regelung Praxis Test
 
 kommentare move test ändern
 

@@ -10,6 +10,7 @@ class RobotMove:
 
     def __init__(self):
         self.last_dist = 0
+        self.max_omega =0.5
         
 
     def follow_line(self, dist_to_line, v):#rechts positiv
@@ -29,6 +30,6 @@ class RobotMove:
                 omega = 0  
 
         self.last_dist = dist_to_line
-        if abs(omega) > 0.5:#zu Hohe Geschwindigkeit abfangen
-                    omega = 0.5*math.copysign(1,omega) 
+        if abs(omega) > self.max_omega:#zu Hohe Geschwindigkeit abfangen
+                    omega = self.max_omega*math.copysign(1,omega) 
         return[v, omega] 

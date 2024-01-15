@@ -12,7 +12,7 @@ class ArucoDistancePublisher(Node):
         self.publisher_distance_to_robot = self.create_publisher(Float32, 'aruco_distance', 10)
         self.publisher_distance_to_line = self.create_publisher(Float32, 'line_distance', 10)
         self.cap = cv.VideoCapture(0)
-        self.aruco_dict = cv.aruco.Dictionary_get(cv.aruco.DICT_6X6_250)
+        self.aruco_dict = cv.aruco.Dictionary_get(cv.aruco.DICT_7X7_250)
         self.aruco_params = cv.aruco.DetectorParameters_create()
         self.camera_matrix = None  # Placeholder for camera matrix
         self.distortion_coefficients = None  # Placeholder for distortion coefficients
@@ -24,7 +24,7 @@ class ArucoDistancePublisher(Node):
         self.load_calibration_data()
 
     def load_calibration_data(self):
-        calibration_data_path = '/home/user/ros2_workspace/src/kamera/kamera/calib_data/calibration.npz'
+        calibration_data_path = '/home/ubuntu/kamera/calib_data/calibration.npz'
         if not os.path.exists(calibration_data_path):
             self.get_logger().warning(f"Error: Calibration file '{calibration_data_path}' not found.")
             return
@@ -53,52 +53,57 @@ class ArucoDistancePublisher(Node):
 
         if corners is not None and len(corners) > 0:
             rvecs, tvecs, _ = cv.aruco.estimatePoseSingleMarkers(
-                corners, 6, self.camera_matrix, self.distortion_coefficients
+                corners, 7, self.camera_matrix, self.distortion_coefficients
             )
             distance = np.sqrt(tvecs[0][0][2] ** 2 + tvecs[0][0][0] ** 2 + tvecs[0][0][1] ** 2)
             return distance
         else:
-            return None
+            return -1.0
 
     def calculate_distance_to_line(self, frame):
     
         # Konvertiere das Bild in den HSV-Farbraum
-        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
         
         # Definiere den Farbbereich der weißen Linie
         lower_white = np.array([0, 0, 200])
         upper_white = np.array([255, 50, 255])
         
         # Extrahiere die weiße Linie im Bild
-        mask = cv2.inRange(hsv, lower_white, upper_white)
+        mask = cv.inRange(hsv, lower_white, upper_white)
         
         # Finde Konturen im Bild
-        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours, _ = cv.findContours(mask, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
         
         if len(contours) > 0:
             # Nehme die größte Kontur (Annahme: Die größte Kontur ist die Linie)
-            largest_contour = max(contours, key=cv2.contourArea)
+            largest_contour = max(contours, key=cv.contourArea)
             
             # Berechne den Mittelpunkt der Linie
-            M = cv2.moments(largest_contour)
-            cx = int(M['m10'] / M['m00'])
-            cy = int(M['m01'] / M['m00'])
+            M = cv.moments(largest_contour)
+            try:
+                cx = int(M['m10'] / M['m00'])
+                cy = int(M['m01'] / M['m00'])
+                distance_line = cx - (frame.shape[1] // 2)
+
+            except:
+                pass
             
             # Berechne die Distanz vom Mittelpunkt des Bildes zur Linie
-            distance_line = cx - (frame.shape[1] // 2)
+            
             
             # Zeichne den Mittelpunkt und die Linie auf das Bild
-            #cv2.circle(frame, (cx, cy), 5, (0, 255, 0), -1)  # Mittelpunkt in grün zeichnen
-            #cv2.line(frame, (frame.shape[1] // 2, 0), (frame.shape[1] // 2, frame.shape[0]), (0, 0, 255), 2)  # Linie in rot zeichnen
+            #cv.circle(frame, (cx, cy), 5, (0, 255, 0), -1)  # Mittelpunkt in grün zeichnen
+            #cv.line(frame, (frame.shape[1] // 2, 0), (frame.shape[1] // 2, frame.shape[0]), (0, 0, 255), 2)  # Linie in rot zeichnen
 
             # Zeige das Bild an
-            #cv2.imshow('Detected Line', frame)
-            #cv2.waitKey(0)
+            #cv.imshow('Detected Line', frame)
+            #cv.waitKey(0)
             #cv2.destroyAllWindows()
             
             return distance_line
         else:
-            return None
+            return 66666
          
 
     def publish_distance_robot(self, distance_robot):

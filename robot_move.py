@@ -19,7 +19,7 @@ class RobotMove:
         if abs(dist_to_line)<100:#Bot ist nah an der Linie
             if abs(self.last_dist) < abs(dist_to_line): #entfernt sich der Bot von der Linie?
                 omega=dist_to_line*0.001 #faktor noch einstellen
-            elif abs(self.last_dist) > abs(dist_to_line):#bewegt sich der Bot auf die Linie zu und ist nah dran?
+            elif abs(self.last_dist) > abs(dist_to_line):#bewegt sich der Bot auf die Linie zu?
                 omega=dist_to_line*-0.001 #faktor noch einstellen
             else:#fährt parallel
                 omega =0

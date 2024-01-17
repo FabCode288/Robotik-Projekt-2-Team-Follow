@@ -18,13 +18,13 @@ class RobotTurn():
 
     def turn(self, current_angle):
         """
-        Checks if the desired target angle is reached by 0.1 radians
+        Checks if the desired target angle is reached 
         If not, it returns the velocity to turn with,
         else it returns None
         returns None for invalid parameters
         """
         try:
-            if abs(current_angle - self.end_angle) > 0.1:
+            if abs(current_angle - self.end_angle) > 0.10:
                 return [0, -self.default_omega]
             else:
                 return None

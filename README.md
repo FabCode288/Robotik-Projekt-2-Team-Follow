@@ -24,6 +24,8 @@ client kürzen
 
 system ablauf überprüfen, order piprline checken
 
+Fabi: im launch File Dateipfade für den Bot anpassen
+
 
 Linienerkennung über Kante
 zwei parallele weiße Kanten

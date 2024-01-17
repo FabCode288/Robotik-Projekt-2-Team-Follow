@@ -11,9 +11,7 @@ import threading
 
 class RobotClient(Node):
     def __init__(self):
-        self._last_result_move = "Start"
-        self._last_result_turn = "Start"
-        self._last_result_follow = "Start"
+        self._last_result = "Start"
         self.target_velocity_linear= 0.1
         self.target_velocity_angular = 0.3
         self.target_velocity = [self.target_velocity_linear,self.target_velocity_angular]
@@ -44,8 +42,8 @@ class RobotClient(Node):
         goal_msg.target_velocity = self.target_velocity
 
         self._action_client_move.wait_for_server()        
-        self._send_goal_future_move = self._action_client_move.send_goal_async(goal_msg, feedback_callback=self.feedback_callback_move)
-        self._send_goal_future_move.add_done_callback(self.goal_response_callback_move)      
+        self._send_goal_future_move = self._action_client_move.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
+        self._send_goal_future_move.add_done_callback(self.goal_response_callback)      
         
     
     def send_goal_follow(self):
@@ -54,8 +52,8 @@ class RobotClient(Node):
         goal_msg.target_distance = self.target_distance
 
         self._action_client_follow.wait_for_server()
-        self._send_goal_future_follow = self._action_client_follow.send_goal_async(goal_msg, feedback_callback=self.feedback_callback_follow)
-        self._send_goal_future_follow.add_done_callback(self.goal_response_callback_follow)
+        self._send_goal_future_follow = self._action_client_follow.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
+        self._send_goal_future_follow.add_done_callback(self.goal_response_callback)
     
     def send_goal_turn(self):
 
@@ -63,11 +61,11 @@ class RobotClient(Node):
         goal_msg.target_velocity = self.target_velocity_angular
 
         self._action_client_turn.wait_for_server()
-        self._send_goal_future_turn = self._action_client_turn.send_goal_async(goal_msg, feedback_callback=self.feedback_callback_turn)
-        self._send_goal_future_turn.add_done_callback(self.goal_response_callback_turn)  
+        self._send_goal_future_turn = self._action_client_turn.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
+        self._send_goal_future_turn.add_done_callback(self.goal_response_callback)  
 
 
-    def goal_response_callback_move(self, future):       
+    def goal_response_callback(self, future):        
         goal_handle = future.result()
         
         if not goal_handle.accepted:
@@ -76,60 +74,16 @@ class RobotClient(Node):
 
         self.get_logger().info('Goal accepted')
 
-        self._get_result_future_move = goal_handle.get_result_async()
-        self._get_result_future_move.add_done_callback(self.get_result_callback_move)
+        self._get_result_future = goal_handle.get_result_async()
+        self._get_result_future.add_done_callback(self.get_result_callback)
 
-    def get_result_callback_move(self, future):
-        self._last_result_move=future.result().result.result
-        self.get_logger().info('Result: '  + self._last_result_move)
-        self.goal_trigger(self._last_result_move)
-        
-    def feedback_callback_move(self, feedback_msg):
-        feedback = feedback_msg.feedback
-        self.get_logger().info('Received feedback: {0}'.format(feedback.current_velocity.linear.x) + ' ' + format(feedback.current_velocity.angular.z))
-        
-    def goal_response_callback_turn(self, future):  
-        #with self.lock_turn:      
-        goal_handle = future.result()
-        
-        if not goal_handle.accepted:
-            self.get_logger().info('Goal rejected')
-            return
-
-        self.get_logger().info('Goal accepted')
-
-        self._get_result_future_turn = goal_handle.get_result_async()
-        self._get_result_future_turn.add_done_callback(self.get_result_callback_turn)
-
-    def get_result_callback_turn(self, future):
-        self._last_result_turn=future.result().result.result
-        self.goal_trigger(self._last_result_turn)
-        self.get_logger().info('Result: ' + self._last_result_turn)
+    def get_result_callback(self, future):
+        self._last_result=future.result().result.result
+        self.goal_trigger(self._last_result)
+        self.get_logger().info('Result: ' + self._last_result)
         
         
-    def feedback_callback_turn(self, feedback_msg):
-        feedback = feedback_msg.feedback
-        self.get_logger().info('Received feedback: {0}'.format(feedback.current_velocity.linear.x) + ' ' + format(feedback.current_velocity.angular.z))
-
-    def goal_response_callback_follow(self, future):        
-        goal_handle = future.result()
-        
-        if not goal_handle.accepted:
-            self.get_logger().info('Goal rejected')
-            return
-
-        self.get_logger().info('Goal accepted')
-
-        self._get_result_future_follow = goal_handle.get_result_async()
-        self._get_result_future_follow.add_done_callback(self.get_result_callback_follow)
-
-    def get_result_callback_follow(self, future):
-        self._last_result_follow=future.result().result.result
-        self.goal_trigger(self._last_result_follow)
-        self.get_logger().info('Result: ' + self._last_result_follow)
-        
-        
-    def feedback_callback_follow(self, feedback_msg):
+    def feedback_callback(self, feedback_msg):
         feedback = feedback_msg.feedback
         self.get_logger().info('Received feedback: {0}'.format(feedback.current_velocity.linear.x) + ' ' + format(feedback.current_velocity.angular.z))
     
@@ -146,9 +100,9 @@ class RobotClient(Node):
                 self.send_goal_follow() 
 
 def main(args=None):
-    rclpy.init(args=args) 
+    rclpy.init(args=args)
+    client_node = RobotClient() 
     try:        
-        client_node = RobotClient()
         client_node.goal_trigger("Start")        
         rclpy.spin(client_node)                  
     finally:

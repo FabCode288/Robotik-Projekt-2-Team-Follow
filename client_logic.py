@@ -24,7 +24,7 @@ class ClientLogic():
                 case "Turn_succesfull":
                     order = "move"
                 case "Follow_succesfull":
-                    order = None
+                    order = "move"
                 case "Canceled":
                     order = None
             return order    

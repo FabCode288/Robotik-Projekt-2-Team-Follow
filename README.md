@@ -20,9 +20,10 @@ Move tests
 
 
 TODO:
-RFID Sensor
 
-Move Regelung Praxis Test
+code hübsch machen
+client kürzen
+system ablauf überprüfen, order piprline checken
 
 Linienerkennung über Kante
 zwei parallele weiße Kanten

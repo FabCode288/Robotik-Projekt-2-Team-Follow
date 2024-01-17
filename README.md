@@ -24,4 +24,7 @@ RFID Sensor
 
 Move Regelung Praxis Test
 
- 
+Linienerkennung über Kante
+zwei parallele weiße Kanten
+hough transformation
+x, y als koordinaten, ableitung von x, y ist x punkt, änderung der orientierung ist omega

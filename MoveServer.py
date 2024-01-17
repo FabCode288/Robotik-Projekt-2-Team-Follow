@@ -10,6 +10,7 @@ from rclpy.node import Node
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
 from tf_transformations import euler_from_quaternion
+from std_msgs.msg import Float32
 
 from ro36_interfaces.action import Move
 from rclpy.action import CancelResponse, GoalResponse
@@ -28,6 +29,7 @@ class MoveServer(Node):
         # self._last_pose_pitch = 0
         # self._last_pose_theta = 0
         self._last_rfid_tag = "None"
+        self._new_rfid_tag = "None"
         self._dist_to_line = 0
 
 
@@ -36,6 +38,7 @@ class MoveServer(Node):
             'rfid_topic',
             self._rfid_callback,
             10)
+        
         # self.odom_sub = self.create_subscription(
         #     Odometry,
         #     'odom',
@@ -85,7 +88,7 @@ class MoveServer(Node):
      
     def _rfid_callback(self, msg):  
         self._last_rfid_tag = msg.data   
-        self.get_logger().info('Read RFID: ' + format(msg.data))
+        self.get_logger().info('Read RFID im Callback: ' + format(msg.data))
        
     def _line_dist_callback(self, msg):
         self._dist_to_line = msg.data   
@@ -94,6 +97,15 @@ class MoveServer(Node):
     def _goal_callback(self, goal_request):
         self.get_logger().info('Received goal request')
         return GoalResponse.ACCEPT
+    
+    def rfid_changed(self):
+        if (self._last_rfid_tag != self._new_rfid_tag and self._last_rfid_tag != "None"): 
+            self.get_logger().info('RFID did change')
+            self._new_rfid_tag = self._last_rfid_tag
+            return True
+        else:
+            self.get_logger().info('RFID did not change')
+            return False 
 
     def _handle_accepted_callback(self, goal_handle):
         with self._goal_handle_lock: #locks the next block for another thread, just one thread can access it
@@ -110,12 +122,12 @@ class MoveServer(Node):
     def _execute_callback(self, goal_handle):
         self.get_logger().info('Executing move')
         mover = RobotMove()         
-        vel = mover.follow_line(self._dist_to_line, goal_handle.request.v)       
-        while(goal_handle.is_active and not goal_handle.is_cancel_requested and vel is not None):
-            vel = mover.follow_line(self._dist_to_line, goal_handle.request.v)
+        vel = mover.follow_line(self._dist_to_line, 0.05)       
+        while(goal_handle.is_active and not goal_handle.is_cancel_requested and vel is not None and  self.rfid_changed() == False):
+            vel = mover.follow_line(self._dist_to_line, 0.05)
             self._publish_velocity(vel)
             self._publish_feedback(goal_handle, vel)
-            time.sleep(0.05)
+            #time.sleep(0.05)
             
         self._publish_velocity(None)
         return self._determine_action_result(goal_handle)
@@ -123,7 +135,7 @@ class MoveServer(Node):
     def _publish_velocity(self, vel):
         velocity_msg = Twist() 
         if(vel is not None):
-            self.get_logger().info("Velocity: {}, {}".format(vel[0], vel[1]) )
+            #self.get_logger().info("Velocity: {}, {}".format(vel[0], vel[1]) )
             velocity_msg.angular.z = float(vel[1])
             velocity_msg.linear.x = float(vel[0]) 
             self._cmd_pub.publish(velocity_msg)
@@ -141,22 +153,24 @@ class MoveServer(Node):
     #     else:
     #         return None
    
-    # def _rfid_changed(self):
-    #     if (self._current_rfid_data != "0" and self._last_rfid_tag != self._current_rfid_data ): 
-    #         return True
-    #     else:
-    #         return False 
+    def _rfid_changed(self):
+        if (self._current_rfid_data != "0" and self._last_rfid_tag != self._current_rfid_data ): 
+            return True
+        else:
+            return False 
 
     def _publish_feedback(self, goal_handle, vel):
         if(vel is not None):
             feedback_msg = Move.Feedback()
             velocity_msg = Twist()            
-            velocity_msg.angular.z = vel[1]
-            velocity_msg.linear.x = vel[0] 
+            velocity_msg.angular.z = float(vel[1])
+            velocity_msg.linear.x = float(vel[0])
             feedback_msg.current_velocity = velocity_msg
             goal_handle.publish_feedback(feedback_msg)
 
     def _determine_action_result(self, goal_handle):
+        self.get_logger().info('determine_action_result aufgerufen')
+
         result = Move.Result()
         if goal_handle.is_active and self._last_rfid_tag!="None": 
             self.get_logger().info('Move succeeded')

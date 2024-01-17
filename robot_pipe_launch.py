@@ -23,8 +23,13 @@ def generate_launch_description():
             output='screen'
         ),
         launch.actions.ExecuteProcess(
-            cmd=[sys.executable, '/home/vinc/ros2_ws/src/rfid_pub/rfid_pub/RFID_Sensor_pub.py'],
+            cmd=[sys.executable, '/home/vinc/ros2_ws/src/rfid_pub/rfid_pub/RFID_Sensor_pub.py'],#auf bot anpassen
             name='rfid_pub',
+            output='screen'
+        ),
+        launch.actions.ExecuteProcess(
+            cmd=[sys.executable, '/home/vinc/ros2_ws/src/rfid_pub/rfid_pub/RFID_Sensor_pub.py'],#auf bot anpassen
+            name='distance_pub',
             output='screen'
         ),
         launch_ros.actions.Node(

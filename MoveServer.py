@@ -22,15 +22,11 @@ class MoveServer(Node):
 
     def __init__(self):
         super().__init__('move_action_server')
-        # Odometrie Daten werden nur Zeit von FollowLine nicht verwendet
-        #self._last_pose_x = 0
-        #self._last_pose_y = 0
-        # self._last_pose_roll = 0
-        # self._last_pose_pitch = 0
-        # self._last_pose_theta = 0
         self._last_rfid_tag = "None"
         self._new_rfid_tag = "None"
         self._dist_to_line = 0
+        self.dist_to_robot=0
+        
 
 
         self.rfid_sub = self.create_subscription(
@@ -38,12 +34,12 @@ class MoveServer(Node):
             'rfid_topic',
             self._rfid_callback,
             10)
-        
-        # self.odom_sub = self.create_subscription(
-        #     Odometry,
-        #     'odom',
-        #     self._odom_callback,
-        #     10)
+        self.robot_dist_sub = self.create_subscription(
+            Float32,
+            'aruco_distance',
+            self._robot_dist_callback,
+            10)
+
 
         self.line_dist_sub = self.create_subscription(
             Float32,
@@ -66,25 +62,7 @@ class MoveServer(Node):
             callback_group=ReentrantCallbackGroup()
         )
         self._goal_handle_lock = threading.Lock() #Sorgt dafür dass die Action nur von einem Thread gleichzeitig ausgeführt wird und nicht von mehreren parallel 
-    # Odometrie Daten werden nur Zeit von FollowLine nicht verwendet
-    # def _odom_callback(self, msg):
-    #     self._last_pose_x = msg.pose.pose.position.x
-    #     self._last_pose_y = msg.pose.pose.position.y
-    #     self._last_pose_roll, self._last_pose_pitch, self._last_pose_theta = euler_from_quaternion(
-    #         [
-    #             msg.pose.pose.orientation.x,
-    #             msg.pose.pose.orientation.y,
-    #             msg.pose.pose.orientation.z,
-    #             msg.pose.pose.orientation.w 
-    #         ]
-    #     )
-    #     print("Roll: " + str(self._last_pose_roll))
-    #     print("Pitch: " + str(self._last_pose_pitch))
-    #     print("Theta: " + str(self._last_pose_theta))
-    #     print(msg.pose.pose.orientation.x)
-    #     print(msg.pose.pose.orientation.y)
-    #     print(msg.pose.pose.orientation.z)
-    #     print(msg.pose.pose.orientation.w)
+
      
     def _rfid_callback(self, msg):  
         self._last_rfid_tag = msg.data   
@@ -93,6 +71,9 @@ class MoveServer(Node):
     def _line_dist_callback(self, msg):
         self._dist_to_line = msg.data   
         self.get_logger().info('Distance to Line: ' + format(msg.data))
+
+    def _robot_dist_callback(self, msg):
+        self.dist_to_robot = msg.data
 
     def _goal_callback(self, goal_request):
         self.get_logger().info('Received goal request')
@@ -104,7 +85,6 @@ class MoveServer(Node):
             self._new_rfid_tag = self._last_rfid_tag
             return True
         else:
-            self.get_logger().info('RFID did not change')
             return False 
 
     def _handle_accepted_callback(self, goal_handle):
@@ -122,12 +102,13 @@ class MoveServer(Node):
     def _execute_callback(self, goal_handle):
         self.get_logger().info('Executing move')
         mover = RobotMove()         
-        vel = mover.follow_line(self._dist_to_line, 0.05)       
-        while(goal_handle.is_active and not goal_handle.is_cancel_requested and vel is not None and  self.rfid_changed() == False):
+        vel = mover.follow_line(self._dist_to_line, goal_handle.request.target)       
+        while(goal_handle.is_active and not goal_handle.is_cancel_requested and vel is not None 
+                and  self.rfid_changed() == False and self.dist_to_robot!=-1.0):
             vel = mover.follow_line(self._dist_to_line, 0.05)
             self._publish_velocity(vel)
             self._publish_feedback(goal_handle, vel)
-            #time.sleep(0.05)
+            time.sleep(0.05)
             
         self._publish_velocity(None)
         return self._determine_action_result(goal_handle)
@@ -135,7 +116,6 @@ class MoveServer(Node):
     def _publish_velocity(self, vel):
         velocity_msg = Twist() 
         if(vel is not None):
-            #self.get_logger().info("Velocity: {}, {}".format(vel[0], vel[1]) )
             velocity_msg.angular.z = float(vel[1])
             velocity_msg.linear.x = float(vel[0]) 
             self._cmd_pub.publish(velocity_msg)
@@ -143,21 +123,6 @@ class MoveServer(Node):
             velocity_msg.angular.z = 0.0
             velocity_msg.linear.x = 0.0 
             self._cmd_pub.publish(velocity_msg)    
-
-    # def _current_velocity(self, vel):
-    #     if(vel is not None):
-    #         velocity_msg = Twist()            
-    #         velocity_msg.angular.z = vel[1]
-    #         velocity_msg.linear.x = vel[0] 
-    #         return velocity_msg
-    #     else:
-    #         return None
-   
-    def _rfid_changed(self):
-        if (self._current_rfid_data != "0" and self._last_rfid_tag != self._current_rfid_data ): 
-            return True
-        else:
-            return False 
 
     def _publish_feedback(self, goal_handle, vel):
         if(vel is not None):
@@ -177,6 +142,10 @@ class MoveServer(Node):
             self.did_RFID_change=False
             goal_handle.succeed()
             result.result = 'RFID_reached'
+        elif goal_handle.is_active and self.dist_to_robot != -1.0:
+            self.get_logger().info('Move succeeded')
+            goal_handle.succeed()
+            result.result = 'Robot_detected'
         elif goal_handle.is_cancel_requested:
             goal_handle.canceled()
             self.get_logger().info('Move was canceled')

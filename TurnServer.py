@@ -79,7 +79,7 @@ class TurnServer(Node):
 
     def _execute_callback(self, goal_handle):
         self.get_logger().info('Executing turn')
-        mover = RobotTurn(self._last_pose_theta, goal_handle.request.target_velocity)
+        mover = RobotTurn(self._last_pose_theta, 0.5)#goal_handle.request.target_velocity)
         vel = mover.turn(self._last_pose_theta) 
         self.get_logger().info("Velocity: {}, {}".format(vel[0], vel[1]))
         while (goal_handle.is_active and not goal_handle.is_cancel_requested and vel is not None):
@@ -103,16 +103,17 @@ class TurnServer(Node):
 
 
     def _publish_feedback(self, goal_handle, vel):
-        feedback_msg = Turn.Feedback()
-        velocity_msg = Twist()            
-        velocity_msg.angular.z = float(vel[1])
-        velocity_msg.linear.x = float(vel[0]) 
-        feedback_msg.current_velocity = velocity_msg
-        goal_handle.publish_feedback(feedback_msg)
+        if(vel is not None):
+            feedback_msg = Turn.Feedback()
+            velocity_msg = Twist()            
+            velocity_msg.angular.z = float(vel[1])
+            velocity_msg.linear.x = float(vel[0]) 
+            feedback_msg.current_velocity = velocity_msg
+            goal_handle.publish_feedback(feedback_msg)
 
     def _determine_action_result(self, goal_handle, vel):
         result = Turn.Result()
-        if goal_handle.is_active and vel ==[0,0]:
+        if goal_handle.is_active:# and vel == [0.0,0.0]:
             self.get_logger().info('Turn succeeded')
             goal_handle.succeed()
             result.result = "Turn_succesfull"

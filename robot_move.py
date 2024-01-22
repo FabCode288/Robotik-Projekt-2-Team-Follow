@@ -21,10 +21,9 @@ class RobotMove:
             return [v,0.0]
         else:
             derivative = (dist_to_line - self.last_dist)/self.step
-            omega=-1*(dist_to_line*self.kP + derivative*self.kD)  
-            print("Distanz: " + str(dist_to_line) + " Omega: " +     str(omega))
-    
-    
+            omega=-1*(dist_to_line*self.kP + derivative*self.kD) 
+            
+            print("Distanz: " + str(dist_to_line) + " Omega: " +     str(omega))   
             self.last_dist = dist_to_line
             if abs(omega) > self.max_omega:#zu Hohe Geschwindigkeit abfangen
                         omega = self.max_omega*math.copysign(1,omega) *-1

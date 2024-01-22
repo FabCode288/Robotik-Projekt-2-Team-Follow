@@ -17,7 +17,7 @@ class RobotMove:
         
 
     def follow_line(self, dist_to_line, v):#rechts positiv
-        if dist_to_line == 6666.0
+        if dist_to_line == 66666.0
             return [v,0.0]
         else:
             derivative = (dist_to_line - self.last_dist)/self.step

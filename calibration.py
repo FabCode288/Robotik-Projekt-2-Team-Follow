@@ -28,7 +28,7 @@ class Calibration:
         
         img_points_2d = []
 
-        files = os.listdir(self.image_dir_path)#iterate the images
+        files = os.listdir(self.image_dir_path)#iterate all images
         for file in files:
             imagePath = os.path.join(self.image_dir_path, file)
 
@@ -66,7 +66,7 @@ class Calibration:
         data = np.load(f"{self.calib_data_path}/calibration.npz")
         cam_matrix = data["camera_matrix"]
         dist_coef = data["distortion_coefficients"]
-        r_vector = data["rvecs"]# mit distanz zu checken
+        r_vector = data["rvecs"]# mit distanz zu checken 
         t_vector = data["tvecs"]
 
         print("Loaded calibration data successfully")

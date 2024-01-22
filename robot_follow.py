@@ -17,22 +17,18 @@ class RobotFollow(RobotMove):
     """    
     def follow(self, dist_to_robot, dist_to_line):
         try:
-            error = (dist_to_robot-self.wanted_dist) #Faktor noch einstellen
+            error = (dist_to_robot-self.wanted_dist) 
            
-            res = error * self.kp2 #Faktor noch einstellen
+            res = error * self.kp2            
             
-            if dist_to_robot <= 0.2: #Nothaltres
-                print('Dist to Robot Logik' + str(dist_to_robot))
+            self.v += res
+            if (self.v<=0):
+                self.v=0
                 return [0,0]
             else:
-                self.v += res
-                if (self.v<=0):
-                    self.v=0
-                    return [0,0]
-                else:
-                    self.v=min(self.v,0.1)
+                self.v=min(self.v,0.1)
 
-                return self.follow_line(dist_to_line, self.v)#[self.v,0]
+            return self.follow_line(dist_to_line, self.v)#[self.v,0]
         except:
             print('Logik returns None   ')
             return None

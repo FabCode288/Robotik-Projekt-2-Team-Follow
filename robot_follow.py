@@ -30,6 +30,5 @@ class RobotFollow(RobotMove):
 
             return self.follow_line(dist_to_line, self.v)#[self.v,0]
         except:
-            print('Logik returns None   ')
             return None
         

@@ -13,6 +13,9 @@ from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.executors import MultiThreadedExecutor
 from move_server.robot_move import RobotMove
 
+import signal
+import sys
+
 class MoveServer(Node):
 
     def __init__(self):
@@ -54,7 +57,6 @@ class MoveServer(Node):
         )
         self._goal_handle_lock = threading.Lock() #Sorgt dafür dass die Action nur von einem Thread gleichzeitig ausgeführt wird und nicht von mehreren parallel 
 
-     
     def _rfid_callback(self, msg):  
         self._last_rfid_tag = msg.data   
        
@@ -145,18 +147,16 @@ class MoveServer(Node):
         self._publish_velocity(None) #affirms motorstop at the end of every action
         return result
 
-
 def main():
     rclpy.init()
     try:
-        robot_mover_executor = MultiThreadedExecutor(3)
+        robot_mover_executor = MultiThreadedExecutor(10)
         move_server = MoveServer()
         rclpy.spin(node=move_server, executor=robot_mover_executor)
+
     finally:
         move_server.destroy_node()
         rclpy.shutdown()
-
-
 
 if __name__ == '__main__':
     main()

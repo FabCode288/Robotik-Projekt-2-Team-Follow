@@ -12,13 +12,16 @@ class RobotMove:
         self.last_dist = 0
         self.max_omega =0.3
         self.kP = 0.0002
+        self.kD = 0.0002
+        self.step = 0.05
         
 
     def follow_line(self, dist_to_line, v):#rechts positiv
         if dist_to_line == 6666.0
             return [v,0.0]
         else:
-            omega=-1*dist_to_line*self.kP   
+            derivative = (dist_to_line - self.last_dist)/self.step
+            omega=-1*(dist_to_line*self.kP + derivative*self.kD)  
             print("Distanz: " + str(dist_to_line) + " Omega: " +     str(omega))
     
     

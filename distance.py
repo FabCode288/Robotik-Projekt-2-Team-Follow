@@ -24,7 +24,7 @@ class ArucoDistancePublisher(Node):
         self.load_calibration_data()
 
     def load_calibration_data(self):
-        calibration_data_path = '/home/ubuntu/kamera/calib_data/calibration.npz'
+        calibration_data_path = '/home/ubuntu/ros2_ws_bot/src/kamera/calib_data/calibration.npz'
         if not os.path.exists(calibration_data_path):
             self.get_logger().warning(f"Error: Calibration file '{calibration_data_path}' not found.")
             return
@@ -59,105 +59,69 @@ class ArucoDistancePublisher(Node):
             return distance/100
         else:
             return -1.0
+    def calculate_distance_to_line(self, image):
 
-    def calculate_distance_to_line(self, frame):
-       
-        h, w = frame.shape[:2]
-        frame = frame[h//2:, :]
+        # Funktion zum Umwandeln des Bildes in ein Binärbild
+        def convert_to_binary(image):
+            gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+            _, binary_image = cv.threshold(gray, 127, 255, cv.THRESH_BINARY)
+            return binary_image
 
-    # Wandle das Bild in ein Binärbild um
-        frame_binary = self.convert_to_binary(frame)
+        # Funktion zur Durchführung der Segmentierung
+        def segmentation(image):
+            contours, _ = cv.findContours(image, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+            segmented_image = np.zeros_like(image)
+            cv.drawContours(segmented_image, contours, -1, (255), thickness=cv.FILLED)
+            return segmented_image, contours
 
-        # Führe Erosion und Dilatation durch, um kleine Lücken oder Störungen zu schließen
-        kernel = np.ones((5, 5), np.uint8)
-        frame_binary = cv.erode(frame_binary, kernel, iterations=3)
-        frame_binary = cv.dilate(frame_binary, kernel, iterations=3)
-        
-        # Finde Konturen im Bild
-        contours, _ = cv.findContours(frame_binary, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-        
+        # Funktion zur Durchführung der morphologischen Transformation
+        def morphological_transform(image):
+            kernel = np.ones((5, 5), np.uint8)
+            transformed_image = cv.morphologyEx(image, cv.MORPH_CLOSE, kernel)
+            return transformed_image
+
+        # Funktion zum Abschneiden der unteren zwei Drittel des Bildes
+        def crop_lower_two_thirds(image, cut_percentage=50):
+            height, width = image.shape[:2]
+            lower_percentage = cut_percentage
+            lower_two_thirds = int(lower_percentage * height / 100)
+            return image[lower_two_thirds:, :]
+
+        cropped_image = crop_lower_two_thirds(image)
+
+        smoothed_image = cv.GaussianBlur(cropped_image, (7, 7), 0)
+
+        # 2. Umwandeln des Bildes in ein Binärbild
+        binary_image = convert_to_binary(smoothed_image)
+
+        # 4. Durchführung der morphologischen Transformation
+        transformed_image = morphological_transform(binary_image)
+
+        smoothed_image = cv.GaussianBlur(transformed_image, (7, 7), 0)
+
+        # 3. Durchführung der Segmentierung und Erhalt der Konturen
+        segmented_image, contours = segmentation(smoothed_image)
+
+        # Sortiere Konturen nach ihrer Fläche in absteigender Reihenfolge
+        contours = sorted(contours, key=cv.contourArea, reverse=True)
+
         if len(contours) > 0:
-            # Nehme die größte Kontur (Annahme: Die größte Kontur ist die Linie)
-            largest_contour = max(contours, key=cv.contourArea)
+            # Wähle die größte Kontur
+            largest_contour = contours[0]
             
-            # Berechne die Momente der Kontur
-            moments = cv.moments(largest_contour)
-            
-            if moments["m00"] != 0:
-                # Berechne den Schwerpunkt der Kontur
-                cx = int(moments["m10"] / moments["m00"])
-                cy = int(moments["m01"] / moments["m00"])
-                return (cx - (w // 2))  # Abstand vom Mittelpunkt des Bildes zu 5% vom unteren Rand der erkannten Linie
-            
+            # Berechne den Schwerpunkt (Centroid) der Kontur
+            M = cv.moments(largest_contour)
+            if(M["m00"] != 0):
+                centroid_x = int(M["m10"] / M["m00"])
+
+                # Berechne die horizontale Abweichung vom Bildmittelpunkt
+                image_width = image.shape[1]
+                return centroid_x - image_width // 2
             else:
                 return 66666
-         
-    def find_line_HSV(self):
-        height, width, _ = frame.shape
-        frame = frame[height//3:, :]
-
-        
-       # Konvertiere das Bild in den HSV-Farbraum
-        hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
-        
-        # Extrahiere den S-Kanal im HSV-Farbraum
-        s_channel = hsv[:, :, 1]
-        
-        # Definiere den optimierten Farbbereich der weißen Linie basierend auf dem S-Kanal
-        lower_white = np.array([0, 0, 120])
-        upper_white = np.array([180, 60, 255])
-        
-        # Extrahiere die weiße Linie im Bild
-        mask = cv.inRange(hsv, lower_white, upper_white)
-        mask = cv.bitwise_and(mask, s_channel)  # Nutze den S-Kanal zur Verbesserung der Farbsegmentierung
-        
-        # Führe Erosion und Dilatation durch, um kleine Lücken oder Störungen zu schließen
-        kernel = np.ones((5,5),np.uint8)
-        mask = cv.erode(mask, kernel, iterations=0)
-        mask = cv.dilate(mask, kernel, iterations=0)
-        
-        # Finde Konturen im Bild
-        contours, _ = cv.findContours(mask, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-        
-        if len(contours) > 0:
-            # Nehme die größte Kontur (Annahme: Die größte Kontur ist die Linie)
-            largest_contour = max(contours, key=cv.contourArea)
             
-            # Extrahiere die äußersten Punkte der Kontur
-            ext_left = tuple(largest_contour[largest_contour[:, :, 0].argmin()][0])
-            ext_right = tuple(largest_contour[largest_contour[:, :, 0].argmax()][0])
-
-            # Berechne den Mittelpunkt der Linie auf der y-Höhe von 1% über dem unteren Rand der Linie
-            distance_from_bottom = int((ext_left[1] + ext_right[1]) * 0.01)  # 1% vom unteren Rand der erkannten Linie
-            line_height = max(ext_left[1], ext_right[1]) - distance_from_bottom  # Höhe der unteren 1 %
-            cx = (ext_left[0] + ext_right[0]) // 2
-
-            M = cv.moments(largest_contour)
-            try:
-                centroid_x = int(M["m10"] / M["m00"])
-                centroid_y = int(M["m01"] / M["m00"])
-            except:
-                return None
-            #cv.circle(frame, (centroid_x, centroid_y), 10, (23, 255, 255), -1)  # Mittelpunkt 5% vom unteren Rand der Linie in grün zeichnen
-
-
-            # Zeichne den Mittelpunkt und die Linie auf das Bild
-            #cv.circle(frame, (cx, line_height), 10, (0, 255, 0), -1)  # Mittelpunkt 5% vom unteren Rand der Linie in grün zeichnen
-            #cv.line(frame, (width // 2, line_height), (width // 2, max(ext_left[1], ext_right[1])), (0, 0, 255), 5)  # Linie in rot zeichnen
-
-            # Zeichne die Kontur des erkannten weißen Streifens
-            #cv.drawContours(frame, [largest_contour], -1, (255, 0, 0), 5)
-
-            # Zeichne eine gestrichelte Linie senkrecht in die Mitte des Bildes
-            #cv.line(frame, (width // 2, 0), (width // 2, height), (255, 255, 255), 1, cv.LINE_AA)
-
-            # Skaliere das Bild auf 20% der Originalgröße
-            #scaled_frame = cv.resize(frame, (int(width * 0.7), int(height * 0.4)))
-
-            # Zeige das skalierte Bild an
-            #cv.imshow('Detected Line', scaled_frame)
-            #cv.waitKey(0)
-            #cv.destroyAllWindows()
+        else:
+            return 66666
         
     def publish_distance_robot(self, distance_robot):
         msg_robot = Float32()
@@ -170,15 +134,6 @@ class ArucoDistancePublisher(Node):
         msg_line.data = float(distance_line)
         self.publisher_distance_to_line.publish(msg_line)
         self.get_logger().info('Publishing distance to line: "%s"' % msg_line.data)
-
-    def convert_to_binary(self, image):
-    # Konvertiere das Bild in Graustufen
-        gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
-        
-        # Wende Schwellenwert an, um ein Binärbild zu erstellen
-        _, binary_image = cv.threshold(gray, 127, 255, cv.THRESH_BINARY)
-        
-        return binary_image
 
 def main(args=None):
     rclpy.init(args=args)

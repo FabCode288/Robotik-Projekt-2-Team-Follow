@@ -59,69 +59,57 @@ class ArucoDistancePublisher(Node):
             return distance/100
         else:
             return -1.0
+        
     def calculate_distance_to_line(self, image):
 
-        # Funktion zum Umwandeln des Bildes in ein Binärbild
-        def convert_to_binary(image):
-            gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
-            _, binary_image = cv.threshold(gray, 127, 255, cv.THRESH_BINARY)
-            return binary_image
+        h, w = image.shape[:2]
+        cropped_image = image[h//2:, :]
 
-        # Funktion zur Durchführung der Segmentierung
-        def segmentation(image):
-            contours, _ = cv.findContours(image, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-            segmented_image = np.zeros_like(image)
-            cv.drawContours(segmented_image, contours, -1, (255), thickness=cv.FILLED)
-            return segmented_image, contours
-
-        # Funktion zur Durchführung der morphologischen Transformation
-        def morphological_transform(image):
-            kernel = np.ones((5, 5), np.uint8)
-            transformed_image = cv.morphologyEx(image, cv.MORPH_CLOSE, kernel)
-            return transformed_image
-
-        # Funktion zum Abschneiden der unteren zwei Drittel des Bildes
-        def crop_lower_two_thirds(image, cut_percentage=50):
-            height, width = image.shape[:2]
-            lower_percentage = cut_percentage
-            lower_two_thirds = int(lower_percentage * height / 100)
-            return image[lower_two_thirds:, :]
-
-        cropped_image = crop_lower_two_thirds(image)
-
-        smoothed_image = cv.GaussianBlur(cropped_image, (7, 7), 0)
-
-        # 2. Umwandeln des Bildes in ein Binärbild
-        binary_image = convert_to_binary(smoothed_image)
-
-        # 4. Durchführung der morphologischen Transformation
-        transformed_image = morphological_transform(binary_image)
-
-        smoothed_image = cv.GaussianBlur(transformed_image, (7, 7), 0)
-
-        # 3. Durchführung der Segmentierung und Erhalt der Konturen
-        segmented_image, contours = segmentation(smoothed_image)
-
-        # Sortiere Konturen nach ihrer Fläche in absteigender Reihenfolge
-        contours = sorted(contours, key=cv.contourArea, reverse=True)
+        # Convert the image into the HSV Space
+        hsv = cv.cvtColor(cropped_image, cv.COLOR_BGR2HSV)
+        
+        # Thresholds for the white line
+        lower_white = np.array([0, 0, 120])
+        upper_white = np.array([255, 50, 255])
+        
+        # Extract the white line from the image
+        mask = cv.inRange(hsv, lower_white, upper_white)
+        contours, _ = cv.findContours(mask, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
 
         if len(contours) > 0:
-            # Wähle die größte Kontur
-            largest_contour = contours[0]
-            
-            # Berechne den Schwerpunkt (Centroid) der Kontur
-            M = cv.moments(largest_contour)
-            if(M["m00"] != 0):
-                centroid_x = int(M["m10"] / M["m00"])
+            # Choose the biggest contour
+            largest_contour = max(contours, key=cv.contourArea)
 
-                # Berechne die horizontale Abweichung vom Bildmittelpunkt
-                image_width = image.shape[1]
-                return centroid_x - image_width // 2
+            # Draw the largest contour onto a black canvas
+            black = np.zeros_like(mask)
+            cv.drawContours(black, [largest_contour], -1, (255, 255, 255), thickness=cv.FILLED)
+
+            # Find the edges of the contour        
+            edges = cv.Canny(black, 20, 700, apertureSize=5)
+
+            # Dilate the edges
+            kernel = np.ones((3,3), np.uint8)
+            dilated_edges = cv.dilate(edges, kernel, iterations=1)
+
+            # Find lines
+            lines = cv.HoughLines(dilated_edges, 1, np.pi / 180, 180)
+
+            # Check if line were found, exclude horizontal lines
+            linecheck = False
+            if lines is not None:
+                for line in lines:
+                    rho, theta = line[0]
+                    if abs(theta) < np.pi/3:
+                        linecheck = True
+
+            # Calculate the centroid of the contour
+            M = cv.moments(largest_contour)
+            if(M["m00"] != 0 and linecheck):
+                centroid_x = int(M["m10"] / M["m00"])
+                return centroid_x - image.shape[1] // 2
             else:
                 return 66666
 
-            
-            
         else:
             return 66666
         

@@ -35,7 +35,7 @@ class Kamera(Node):
         # Undistort the frame
         undistorted_frame = cv.undistort(frame, self.camera_matrix, self.distortion_coefficients)
         img_gray = cv.cvtColor(undistorted_frame, cv.COLOR_BGR2GRAY)
-        # Detect ArUco markers in the undistorted frame
+        # Detect ArUco marker in the undistorted frame
         corners, ids = cv.aruco.detectMarkers(img_gray, self.aruco_dict, parameters=self.aruco_params)
 
         if ids is not None:

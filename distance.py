@@ -24,7 +24,7 @@ class ArucoDistancePublisher(Node):
         self.load_calibration_data()
 
     def load_calibration_data(self):
-        calibration_data_path = '/home/ubuntu/ros2_ws_bot/src/kamera/calib_data/calibration.npz'
+        calibration_data_path = '/home/ubuntu/kamera/calib_data/calibration.npz'
         if not os.path.exists(calibration_data_path):
             self.get_logger().warning(f"Error: Calibration file '{calibration_data_path}' not found.")
             return

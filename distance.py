@@ -119,6 +119,8 @@ class ArucoDistancePublisher(Node):
                 return centroid_x - image_width // 2
             else:
                 return 66666
+
+            
             
         else:
             return 66666

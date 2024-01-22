@@ -18,7 +18,7 @@ class RobotMove:
         if dist_to_line == 6666.0
             return [v,0.0]
         else:
-            omega=-1*dist_to_line*self.kP #faktor noch einstellen   
+            omega=-1*dist_to_line*self.kP   
             print("Distanz: " + str(dist_to_line) + " Omega: " +     str(omega))
     
     

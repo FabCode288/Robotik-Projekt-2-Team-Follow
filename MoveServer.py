@@ -1,17 +1,12 @@
 import rclpy
-import math
 import time
 import threading
-from std_msgs.msg import String
 
+from std_msgs.msg import String
 from rclpy.action import ActionServer
 from rclpy.node import Node
-
-from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
-from tf_transformations import euler_from_quaternion
 from std_msgs.msg import Float32
-
 from ro36_interfaces.action import Move
 from rclpy.action import CancelResponse, GoalResponse
 from rclpy.callback_groups import ReentrantCallbackGroup
@@ -24,10 +19,8 @@ class MoveServer(Node):
         super().__init__('move_action_server')
         self._last_rfid_tag = "None"
         self._new_rfid_tag = "None"
-        self._dist_to_line = 0
-        self.dist_to_robot=0
-        
-
+        self._dist_to_line = 66666
+        self.dist_to_robot = -1.0
 
         self.rfid_sub = self.create_subscription(
             String,
@@ -39,8 +32,6 @@ class MoveServer(Node):
             'aruco_distance',
             self._robot_dist_callback,
             10)
-
-
         self.line_dist_sub = self.create_subscription(
             Float32,
             'line_distance',
@@ -66,11 +57,9 @@ class MoveServer(Node):
      
     def _rfid_callback(self, msg):  
         self._last_rfid_tag = msg.data   
-        self.get_logger().info('Read RFID im Callback: ' + format(msg.data))
        
     def _line_dist_callback(self, msg):
         self._dist_to_line = msg.data   
-        self.get_logger().info('Distance to Line: ' + format(msg.data))
 
     def _robot_dist_callback(self, msg):
         self.dist_to_robot = msg.data
@@ -102,10 +91,10 @@ class MoveServer(Node):
     def _execute_callback(self, goal_handle):
         self.get_logger().info('Executing move')
         mover = RobotMove()         
-        vel = mover.follow_line(self._dist_to_line, goal_handle.request.target)       
+        vel = mover.follow_line(self._dist_to_line, goal_handle.request.target_velocity[0])       
         while(goal_handle.is_active and not goal_handle.is_cancel_requested and vel is not None 
-                and  self.rfid_changed() == False and self.dist_to_robot!=-1.0):
-            vel = mover.follow_line(self._dist_to_line, 0.05)
+                and  self.rfid_changed() == False and self.dist_to_robot == -1.0):
+            vel = mover.follow_line(self._dist_to_line, goal_handle.request.target_velocity[0])
             self._publish_velocity(vel)
             self._publish_feedback(goal_handle, vel)
             time.sleep(0.05)
@@ -134,8 +123,6 @@ class MoveServer(Node):
             goal_handle.publish_feedback(feedback_msg)
 
     def _determine_action_result(self, goal_handle):
-        self.get_logger().info('determine_action_result aufgerufen')
-
         result = Move.Result()
         if goal_handle.is_active and self._last_rfid_tag!="None": 
             self.get_logger().info('Move succeeded')
@@ -154,7 +141,8 @@ class MoveServer(Node):
             if goal_handle.is_active:
                 goal_handle.abort()
                 self.get_logger().info('Move was aborted')
-                result.result = 'Aborted'        
+                result.result = 'Aborted'  
+        self._publish_velocity(None) #affirms motorstop at the end of every action
         return result
 
 

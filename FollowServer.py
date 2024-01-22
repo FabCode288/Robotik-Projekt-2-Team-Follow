@@ -1,24 +1,11 @@
-#Start Befehl
-#ros2 run ro36_simple_mover_server Ro36SimpleMoverServer
-#Send empty Msg
-#ros2 action send_goal -f /go_to ro36_interfaces/action/GoTo "{}"
-#Send full Msg
-#ros2 action send_goal -f /move ro36_interfaces/action/GoTo "{pose: {x: 4.0, y: 4.0, theta: 0.0}}"
-#source install/setup.bash
-
 import rclpy
-import math
 import time
 import threading
 
 from rclpy.action import ActionServer
 from rclpy.node import Node
-
-from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
-from tf_transformations import euler_from_quaternion
 from std_msgs.msg import Float32
-
 from ro36_interfaces.action import Follow
 from rclpy.action import CancelResponse, GoalResponse
 from rclpy.callback_groups import ReentrantCallbackGroup
@@ -31,7 +18,8 @@ class FollowServer(Node):
         super().__init__('follow_action_server')
         self.dist_to_line = 0
         self.dist_to_robot = 0
-        self.i=0
+        self.i = 0
+        self._goal_handle = None
 
         self.robot_dist_sub = self.create_subscription(
             Float32,
@@ -47,8 +35,6 @@ class FollowServer(Node):
 
         self._cmd_pub = self.create_publisher(Twist, 'cmd_vel', 10)
 
-        self._goal_handle = None
-
         self._action_server = ActionServer(
             self,
             Follow,
@@ -59,14 +45,13 @@ class FollowServer(Node):
             cancel_callback=self._cancel_callback,
             callback_group=ReentrantCallbackGroup()
         )
-        self._goal_handle_lock = threading.Lock() #Sorgt dafür dass die Action nur von einem Thread gleichzeitig ausgeführt wird und nicht von mehreren parallel 
+        self._goal_handle_lock = threading.Lock()
 
     def _robot_dist_callback(self, msg):
         self.dist_to_robot = msg.data
 
     def _line_dist_callback(self, msg):
         self.dist_to_line = msg.data
-
 
     def _goal_callback(self, goal_request):
         self.get_logger().info('Received goal request with target distance')
@@ -86,36 +71,25 @@ class FollowServer(Node):
 
     def _execute_callback(self, goal_handle):
         self.get_logger().info('Executing follow')
-        self.get_logger().info("Distance to Robot: {}".format(self.dist_to_robot))
         mover = RobotFollow(goal_handle.request.target_distance)
-        self.get_logger().info('Target Dist: ' + str(goal_handle.request.target_distance))
-
+        self.get_logger().info('Target Distance: ' + str(goal_handle.request.target_distance))
         vel = mover.follow(self.dist_to_robot, self.dist_to_line) 
-        print('vel: ' + str(vel))
-        if vel is not None: self.get_logger().info("Velocity first: {}, {}".format(vel[0], vel[1])) #zu distance ändern
-        self.i=0
-        while(goal_handle.is_active and not goal_handle.is_cancel_requested): #and self.i<100):#if vel is None, wait for 50 Iterations before stopping, to compensate for lost frames
+        self.i = 0
+        while(goal_handle.is_active and not goal_handle.is_cancel_requested and self.i < 40):
             vel = mover.follow(self.dist_to_robot, self.dist_to_line) 
-            #self.get_logger().info('Executing While')
-
-            if self.dist_to_robot==-1.0:
+            if self.dist_to_robot == -1.0:
                self.i += 1
             else:
-                print('vel: ' + str(vel))
-
-                print('Dist_to robot while: ' + str(self.dist_to_robot))
                 self._publish_velocity(vel)
                 self._publish_feedback(goal_handle,vel)
             self.i = 0
-            time.sleep(0.05)
-                
+            time.sleep(0.05)       
         self._publish_velocity(None)
         return self._determine_action_result(goal_handle)
 
     def _publish_velocity(self, vel):
         velocity_msg = Twist() 
         if(vel is not None):
-            self.get_logger().info("Velocity: {}, {}".format(vel[0], vel[1]) )
             velocity_msg.angular.z = float(vel[1])
             velocity_msg.linear.x = float(vel[0]) 
         else:
@@ -134,20 +108,21 @@ class FollowServer(Node):
 
     def _determine_action_result(self, goal_handle):
         result = Follow.Result()
-        if goal_handle.is_active and self.i>=50:
+        if goal_handle.is_active and self.i >= 40:
             self.get_logger().info('Follow succeeded') 
             goal_handle.succeed()
-            #result.reached = True
+            result.result = "Follow_succesfull"
         elif goal_handle.is_cancel_requested:
             goal_handle.canceled()
             self.get_logger().info('Follow was canceled')
+            result.result = "Canceled"
         else:
             if goal_handle.is_active:
                 goal_handle.abort()
                 self.get_logger().info('Follow was aborted')
-        self.i = 0
+                result.result = "Aborted"
+        self._publish_velocity(None) #affirms motorstop at the end of every action
         return result
-
 
 def main():
     rclpy.init()
@@ -158,8 +133,6 @@ def main():
     finally:
         follow_server.destroy_node()
         rclpy.shutdown()
-
-
 
 if __name__ == '__main__':
     main()

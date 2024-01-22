@@ -9,7 +9,6 @@ class ClientLogic():
     """
     Returns the next goal that the client should send depending on the the current value of result
     """
-    
     def get_next_client_order(self,result):
         try:
             match result:
@@ -24,7 +23,7 @@ class ClientLogic():
                 case "Turn_succesfull":
                     order = "move"
                 case "Follow_succesfull":
-                    order = "move"
+                    order = None
                 case "Canceled":
                     order = None
             return order    

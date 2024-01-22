@@ -1,13 +1,12 @@
 import rclpy
+import threading
+
 from rclpy.action import ActionClient
 from rclpy.node import Node
-
 from ro36_interfaces.action import Move
 from ro36_interfaces.action import Follow
 from ro36_interfaces.action import Turn
 from robot_client.client_logic import ClientLogic
-
-import threading
 
 class RobotClient(Node):
     def __init__(self):
@@ -15,8 +14,8 @@ class RobotClient(Node):
         self.target_velocity_linear= 0.1
         self.target_velocity_angular = 0.3
         self.target_velocity = [self.target_velocity_linear,self.target_velocity_angular]
-        self.target_distance= 0.3
-        self.client_logic =ClientLogic()
+        self.target_distance = 0.3
+        self.client_logic = ClientLogic()
 
         self.lock_move = threading.Lock()
         self.lock_turn = threading.Lock()
@@ -26,7 +25,7 @@ class RobotClient(Node):
         self._action_client_move = ActionClient(
             self,
             Move, 
-            'move'            )   
+            'move')   
         self._action_client_follow = ActionClient(
             self,
             Follow, 
@@ -44,7 +43,6 @@ class RobotClient(Node):
         self._action_client_move.wait_for_server()        
         self._send_goal_future_move = self._action_client_move.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
         self._send_goal_future_move.add_done_callback(self.goal_response_callback)      
-        
     
     def send_goal_follow(self):
 
@@ -64,7 +62,6 @@ class RobotClient(Node):
         self._send_goal_future_turn = self._action_client_turn.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
         self._send_goal_future_turn.add_done_callback(self.goal_response_callback)  
 
-
     def goal_response_callback(self, future):        
         goal_handle = future.result()
         
@@ -78,14 +75,13 @@ class RobotClient(Node):
         self._get_result_future.add_done_callback(self.get_result_callback)
 
     def get_result_callback(self, future):
-        self._last_result=future.result().result.result
+        self._last_result = future.result().result.result
         self.goal_trigger(self._last_result)
-        self.get_logger().info('Result: ' + self._last_result)
-        
+        self.get_logger().info('Result: ' + self._last_result)    
         
     def feedback_callback(self, feedback_msg):
         feedback = feedback_msg.feedback
-        self.get_logger().info('Received feedback: {0}'.format(feedback.current_velocity.linear.x) + ' ' + format(feedback.current_velocity.angular.z))
+        self.get_logger().info('Received feedback: {0}'.format(feedback.current_velocity.linear.x) + ', ' + format(feedback.current_velocity.angular.z))
     
     def goal_trigger(self,result):
         order = self.client_logic.get_next_client_order(result)
@@ -97,7 +93,8 @@ class RobotClient(Node):
                 with self.lock_turn:
                     self.send_goal_turn()
             case "follow":
-                self.send_goal_follow() 
+                with self.lock_follow:
+                    self.send_goal_follow() 
 
 def main(args=None):
     rclpy.init(args=args)
@@ -108,5 +105,6 @@ def main(args=None):
     finally:
         client_node.destroy_node()   
         rclpy.shutdown()
+
 if __name__ == '__main__':
     main()

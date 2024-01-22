@@ -1,6 +1,7 @@
 import numpy as np
-import math
+
 from move_server.robot_move import RobotMove
+
 class RobotFollow(RobotMove):
 
     def __init__(self, wanted_dist):
@@ -28,7 +29,7 @@ class RobotFollow(RobotMove):
             else:
                 self.v=min(self.v,0.1)
 
-            return self.follow_line(dist_to_line, self.v)#[self.v,0]
+            return self.follow_line(dist_to_line, self.v)
         except:
             return None
         

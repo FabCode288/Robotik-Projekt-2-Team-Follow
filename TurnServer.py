@@ -1,15 +1,12 @@
 import rclpy
-import math
 import time
 import threading
 
 from rclpy.action import ActionServer
 from rclpy.node import Node
-
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
-from tf_transformations import euler_from_quaternion
-
+from turn_server.tf import euler_from_quaternion
 from ro36_interfaces.action import Turn
 from rclpy.action import CancelResponse, GoalResponse
 from rclpy.callback_groups import ReentrantCallbackGroup
@@ -20,11 +17,8 @@ class TurnServer(Node):
 
     def __init__(self):
         super().__init__('turn_action_server')
-        self._last_pose_x = 0
-        self._last_pose_y = 0
-        self._last_pose_roll = 0
-        self._last_pose_pitch = 0
         self._last_pose_theta = 0
+        self._goal_handle = None
 
         self.odom_sub = self.create_subscription(
             Odometry,
@@ -33,8 +27,6 @@ class TurnServer(Node):
             10)
 
         self._cmd_pub = self.create_publisher(Twist, 'cmd_vel', 10)
-
-        self._goal_handle = None
 
         self._action_server = ActionServer(
             self,
@@ -46,13 +38,9 @@ class TurnServer(Node):
             cancel_callback=self._cancel_callback,
             callback_group=ReentrantCallbackGroup()
         )
-        self._goal_handle_lock = threading.Lock() #Sorgt dafür dass die Action nur von einem Thread gleichzeitig ausgeführt wird 
-                                                  #und nicht von mehreren parallel 
 
     def _odom_callback(self, msg):
-        self._last_pose_x = msg.pose.pose.position.x
-        self._last_pose_y = msg.pose.pose.position.y
-        self._last_pose_roll, self._last_pose_pitch, self._last_pose_theta = euler_from_quaternion(
+        _, _, self._last_pose_theta = euler_from_quaternion(
             [
                 msg.pose.pose.orientation.x,
                 msg.pose.pose.orientation.y,
@@ -79,7 +67,7 @@ class TurnServer(Node):
 
     def _execute_callback(self, goal_handle):
         self.get_logger().info('Executing turn')
-        mover = RobotTurn(self._last_pose_theta, 0.5)#goal_handle.request.target_velocity)
+        mover = RobotTurn(self._last_pose_theta, goal_handle.request.target_velocity)
         vel = mover.turn(self._last_pose_theta) 
         self.get_logger().info("Velocity: {}, {}".format(vel[0], vel[1]))
         while (goal_handle.is_active and not goal_handle.is_cancel_requested and vel is not None):
@@ -93,14 +81,12 @@ class TurnServer(Node):
     def _publish_velocity(self, vel):
         velocity_msg = Twist() 
         if(vel is not None):
-            self.get_logger().info("Velocity: {}, {}".format(vel[0], vel[1]) )
             velocity_msg.angular.z = float(vel[1])
             velocity_msg.linear.x = float(vel[0]) 
         else:
             velocity_msg.angular.z = float(0.0)
             velocity_msg.linear.x = float(0.0) 
         self._cmd_pub.publish(velocity_msg) 
-
 
     def _publish_feedback(self, goal_handle, vel):
         if(vel is not None):
@@ -126,8 +112,8 @@ class TurnServer(Node):
                 goal_handle.abort()
                 self.get_logger().info('Turn was aborted')
                 result.result = "Aborted"
+        self._publish_velocity(None) #affirms motorstop at the end of every action
         return result
-
 
 def main():
     rclpy.init()
@@ -138,8 +124,6 @@ def main():
     finally:
         turn_server.destroy_node()
         rclpy.shutdown()
-
-
 
 if __name__ == '__main__':
     main()

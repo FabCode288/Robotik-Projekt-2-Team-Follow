@@ -77,9 +77,23 @@ def find_parallel_lines(image_path, angular_tolerance=10):
  
 
     cv2.imshow('Lines', cropped)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
 
+
+
+cap = cv2.VideoCapture(0)
+
+while cap.isOpened():
+    ret, frame = cap.read()
+    if not ret:
+        break
+    find_parallel_lines(frame)
+    if cv2.waitKey(25) & 0xFF == ord('q'):
+        break
+
+
+cap.release()
+cv2.destroyAllWindows()
+      
 # Usage
-find_parallel_lines("D:/Uni/proj2/testbilder/bot1.jpg")
+#find_parallel_lines("C:/Uni/kempten/proj2/testbilder/bot1.jpg")
   

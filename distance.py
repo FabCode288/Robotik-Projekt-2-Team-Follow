@@ -88,15 +88,15 @@ class ArucoDistancePublisher(Node):
         h, w = image.shape[:2]
         cropped_image = image[h//2:, :]
 
-        # Convert the image into the HSV Space
-        hsv = cv.cvtColor(cropped_image, cv.COLOR_BGR2HSV)
+        # Convert the image into Grayscale
+        gray = cv.cvtColor(cropped_image, cv.COLOR_BGR2GRAY)
 
         # Thresholds for the white line
-        lower_white = np.array([0, 0, 120])
-        upper_white = np.array([255, 50, 255])
+        lower_white = 120
+        upper_white = 255
 
         # Extract the white line from the image
-        mask = cv.inRange(hsv, lower_white, upper_white)
+        mask = cv.inRange(gray, lower_white, upper_white)
         contours, _ = cv.findContours(mask, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
 
         if len(contours) > 0:

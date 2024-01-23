@@ -1,7 +1,9 @@
 import launch
 import launch_ros.actions
 import sys
-
+"""
+lauch description to start up 2 publishers, 3 action server nodes and 1 action client node
+"""
 def generate_launch_description():
     return launch.LaunchDescription([
         launch.actions.ExecuteProcess(

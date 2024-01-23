@@ -170,7 +170,7 @@ class MoveServer(Node):
 def main():
     rclpy.init()
     try:
-        robot_mover_executor = MultiThreadedExecutor(10)
+        robot_mover_executor = MultiThreadedExecutor(4)
         move_server = MoveServer()
         rclpy.spin(node=move_server, executor=robot_mover_executor)
 

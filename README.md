@@ -25,3 +25,10 @@ Abbruch:
 
 In beiden Terminals strg + c
 
+Einstellungsmöglichkeiten:
+
+Es ist möglich die Fahrgeschwindigkeit (self.target_velocity_linear), Drehgeschwindigkeit (self.target_velocity_angular) und den Abstand zum Folgen (self.target_distance) einfach zu bearbeiten.
+Dies ist möglich in der init Methode im RobotClient.
+Die voreingestellten Werte haben sich in Test als bewährt bewiesen und sorgen für einen möglichst reibungslosen Ablauf.
+
+

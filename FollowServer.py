@@ -14,6 +14,8 @@ from follow_server.robot_follow import RobotFollow
 
 """
 Action server to controll movement of a robot following a robot and a line
+has subscriptions to dist_to_line publisher and auco_distance publisher
+publishes movement order
 """
 class FollowServer(Node):
 

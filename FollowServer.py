@@ -110,7 +110,10 @@ class FollowServer(Node):
             velocity_msg.linear.x = float(vel[0]) 
             feedback_msg.current_velocity = velocity_msg
             goal_handle.publish_feedback(feedback_msg)
-
+"""
+Method to determine and return result
+is succesfull when when there was no aruco marker detected for at least 2 seconds 
+"""
     def _determine_action_result(self, goal_handle):
         result = Follow.Result()
         if goal_handle.is_active and self.i >= 40:

@@ -1,30 +1,39 @@
 import rclpy
-from rclpy.node import Node
-from std_msgs.msg import Float32
 import cv2 as cv
 import numpy as np
 import os
+
+from rclpy.node import Node
+from std_msgs.msg import Float32
+
+"""
+Publisher class for the distance to the ahead robot and the distance to the white line
+"""
 
 class ArucoDistancePublisher(Node):
 
     def __init__(self):
         super().__init__('aruco_distance_publisher')
-        self.publisher_distance_to_robot = self.create_publisher(Float32, 'aruco_distance', 10)
+        self.publisher_distance_to_robot = self.create_publisher(Float32, 'aruco_distance', 10) #Creating a publsiher to publish the distance to 
         self.publisher_distance_to_line = self.create_publisher(Float32, 'line_distance', 10)
         self.cap = cv.VideoCapture(0)
         self.aruco_dict = cv.aruco.Dictionary_get(cv.aruco.DICT_7X7_250)
         self.aruco_params = cv.aruco.DetectorParameters_create()
-        self.camera_matrix = None  # Placeholder for camera matrix
-        self.distortion_coefficients = None  # Placeholder for distortion coefficients
+        self.camera_matrix = None 
+        self.distortion_coefficients = None 
 
-        timer_period = 0.2  # Publishes data every 0.2 seconds (5Hz)
+        timer_period = 0.2  # Publishes data with a frequency of 5Hz
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
         # Load calibration data and set camera matrix and distortion coefficients
         self.load_calibration_data()
+        
+    """
+    Method loading the camera calibration file.
+    """
 
     def load_calibration_data(self):
-        calibration_data_path = '/home/ubuntu/kamera/calib_data/calibration.npz'
+        calibration_data_path = '/home/ubuntu/ros2_ws_bot/src/kamera/calib_data/calibration.npz'
         if not os.path.exists(calibration_data_path):
             self.get_logger().warning(f"Error: Calibration file '{calibration_data_path}' not found.")
             return
@@ -47,6 +56,12 @@ class ArucoDistancePublisher(Node):
         if distance_line is not None:
             self.publish_distance_line(distance_line)
 
+    """
+    Method calculating the distance to the robot/aruco marker.
+    If an aruco marker is detected the method returns the distance.
+    If no aruco marler is detected the method returns an error value of -1.0 
+    """
+
     def calculate_distance_to_robot(self, frame):
         img_gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
         corners, _, _ = cv.aruco.detectMarkers(img_gray, self.aruco_dict, parameters=self.aruco_params)
@@ -59,70 +74,66 @@ class ArucoDistancePublisher(Node):
             return distance/100
         else:
             return -1.0
+        
+    """
+    Method calculating the distance to the white line in pixel for every frame.
+    Depending on the position of the line in the frame the Method returns a positiv or a negative value.
+    If the line is on the left ahnd side if the robot the value is negativ.
+    If the line is on right hand side of the Robot the Value is positiv.
+    If no line is detected the method returns an error value of 66666.
+    """
+        
     def calculate_distance_to_line(self, image):
 
-        # Funktion zum Umwandeln des Bildes in ein Binärbild
-        def convert_to_binary(image):
-            gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
-            _, binary_image = cv.threshold(gray, 127, 255, cv.THRESH_BINARY)
-            return binary_image
+        h, w = image.shape[:2]
+        cropped_image = image[h//2:, :]
 
-        # Funktion zur Durchführung der Segmentierung
-        def segmentation(image):
-            contours, _ = cv.findContours(image, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-            segmented_image = np.zeros_like(image)
-            cv.drawContours(segmented_image, contours, -1, (255), thickness=cv.FILLED)
-            return segmented_image, contours
+        # Convert the image into the HSV Space
+        hsv = cv.cvtColor(cropped_image, cv.COLOR_BGR2HSV)
 
-        # Funktion zur Durchführung der morphologischen Transformation
-        def morphological_transform(image):
-            kernel = np.ones((5, 5), np.uint8)
-            transformed_image = cv.morphologyEx(image, cv.MORPH_CLOSE, kernel)
-            return transformed_image
+        # Thresholds for the white line
+        lower_white = np.array([0, 0, 120])
+        upper_white = np.array([255, 50, 255])
 
-        # Funktion zum Abschneiden der unteren zwei Drittel des Bildes
-        def crop_lower_two_thirds(image, cut_percentage=50):
-            height, width = image.shape[:2]
-            lower_percentage = cut_percentage
-            lower_two_thirds = int(lower_percentage * height / 100)
-            return image[lower_two_thirds:, :]
-
-        cropped_image = crop_lower_two_thirds(image)
-
-        smoothed_image = cv.GaussianBlur(cropped_image, (7, 7), 0)
-
-        # 2. Umwandeln des Bildes in ein Binärbild
-        binary_image = convert_to_binary(smoothed_image)
-
-        # 4. Durchführung der morphologischen Transformation
-        transformed_image = morphological_transform(binary_image)
-
-        smoothed_image = cv.GaussianBlur(transformed_image, (7, 7), 0)
-
-        # 3. Durchführung der Segmentierung und Erhalt der Konturen
-        segmented_image, contours = segmentation(smoothed_image)
-
-        # Sortiere Konturen nach ihrer Fläche in absteigender Reihenfolge
-        contours = sorted(contours, key=cv.contourArea, reverse=True)
+        # Extract the white line from the image
+        mask = cv.inRange(hsv, lower_white, upper_white)
+        contours, _ = cv.findContours(mask, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
 
         if len(contours) > 0:
-            # Wähle die größte Kontur
-            largest_contour = contours[0]
-            
-            # Berechne den Schwerpunkt (Centroid) der Kontur
+            # Choose the biggest contour
+            largest_contour = max(contours, key=cv.contourArea)
+
+        # Draw the largest contour onto a black canvas
+            black = np.zeros_like(mask)
+            cv.drawContours(black, [largest_contour], -1, (255, 255, 255), thickness=cv.FILLED)
+
+        # Find the edges of the contour        
+            edges = cv.Canny(black, 20, 700, apertureSize=5)
+
+                    # Dilate the edges
+            kernel = np.ones((3,3), np.uint8)
+            dilated_edges = cv.dilate(edges, kernel, iterations=1)
+
+        # Find lines
+            lines = cv.HoughLines(dilated_edges, 1, np.pi / 180, 190)
+
+         # Check if line were found, exclude horizontal lines
+            linecheck = False
+            if lines is not None:
+                linecheck = True
+
             M = cv.moments(largest_contour)
-            if(M["m00"] != 0):
+            
+            if(M["m00"] != 0 and linecheck):
                 centroid_x = int(M["m10"] / M["m00"])
 
-                # Berechne die horizontale Abweichung vom Bildmittelpunkt
-                image_width = image.shape[1]
-                return centroid_x - image_width // 2
+                return centroid_x - image.shape[1] // 2 + 30
             else:
                 return 66666
-            
         else:
             return 66666
-        
+
+
     def publish_distance_robot(self, distance_robot):
         msg_robot = Float32()
         msg_robot.data = float(distance_robot)

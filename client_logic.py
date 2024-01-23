@@ -1,5 +1,5 @@
 """
-Serves as an object in the clients main to process the last result and returns the next order
+Serves as an object in the clients goal_trigger to process the last result and returns the next order
 """
 
 class ClientLogic():

@@ -73,7 +73,13 @@ class FollowServer(Node):
     def _cancel_callback(self, goal_handle):
         self.get_logger().info('Cancelling follow')
         return CancelResponse.ACCEPT
-
+"""
+Method to controll movement of the robot
+uses an instance of RobotFollow to calculate movement command 
+increases a counter for every time there was no aruco marker detected 
+terminates when there was no aruco marker detected for 2 seconds
+publishes zero velocity to stop movement at the end 
+"""
     def _execute_callback(self, goal_handle):
         self.get_logger().info('Executing follow')
         mover = RobotFollow(goal_handle.request.target_distance)

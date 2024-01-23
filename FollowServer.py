@@ -12,6 +12,9 @@ from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.executors import MultiThreadedExecutor
 from follow_server.robot_follow import RobotFollow
 
+"""
+Action server to controll movement of a robot following a robot and a line
+"""
 class FollowServer(Node):
 
     def __init__(self):

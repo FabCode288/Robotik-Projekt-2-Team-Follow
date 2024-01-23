@@ -43,8 +43,9 @@ Die Beleuchtung sollte kaltes Licht sein und die Oberflächen möglichst nicht r
 Startup:
 
 Um den Roboter zu starten muss zuerst in einem Terminal der turtlebot launch Befehl ausgeführt werden
-und in einem zweiten Terminal 
+und in einem zweiten Terminal ro36_move_control_follow ausgeführt werden.
 
-Stop:
+Abbruch:
 
+In beiden Terminals strg + c
 

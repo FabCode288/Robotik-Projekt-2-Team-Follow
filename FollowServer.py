@@ -140,7 +140,7 @@ is succesfull when when there was no aruco marker detected for at least 2 second
 
 def main():
     rclpy.init()
-    robot_mover_executor = MultiThreadedExecutor(10)
+    robot_mover_executor = MultiThreadedExecutor(3)
     follow_server = FollowServer()
     try:
         rclpy.spin(node=follow_server, executor=robot_mover_executor)

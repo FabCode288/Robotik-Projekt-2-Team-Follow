@@ -34,3 +34,17 @@ hough transformation
 x, y als koordinaten, ableitung von x, y ist x punkt, änderung der orientierung ist omega
 
 kalibrierung bei näheren abständen
+
+Setup Bedingungen:
+
+Brettübergänge müssen fließend sein, Kanten führen zu schlagartigen Richtungsänderungen
+Die Beleuchtung sollte kaltes Licht sein und die Oberflächen möglichst nicht reflektiv.
+
+Startup:
+
+Um den Roboter zu starten muss zuerst in einem Terminal der turtlebot launch Befehl ausgeführt werden
+und in einem zweiten Terminal 
+
+Stop:
+
+

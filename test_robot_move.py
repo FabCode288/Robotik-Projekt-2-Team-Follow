@@ -27,6 +27,16 @@ def test_follow_line_straight_path():
     # Test for straight path (dist_to_line close to 0)
     command = robot.follow_line(0, v)
     assert command[1] == 0, "Robot should move straight when on the line"
+"""
+Given a new RobotMove with v = 0.1 
+When the method follow_line is called with dist to line = 66666
+Then the method returns omega = 0
+"""
+def test_follow_no_line():
+    robot = RobotMove()
+    v = 0.1  
+    command = robot.follow_line(0, v)
+    assert command[1] == 0, "Robot should move straight when no line is detected line"
 
 """
 Given a new RobotMove with v = 0.1 

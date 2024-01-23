@@ -13,12 +13,19 @@ from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.executors import MultiThreadedExecutor
 from turn_server.robot_turn import RobotTurn
 
+"""
+Turn server to controll movement of a robot to turn 180 degrees
+Has subscriptions on the odometry data of the robot
+Publishes an angular velocity until the rotation is complete
+"""
+
 class TurnServer(Node):
 
     def __init__(self):
         super().__init__('turn_action_server')
         self._last_pose_theta = 0
         self._goal_handle = None
+        self._goal_handle_lock = threading.Lock()
 
         self.odom_sub = self.create_subscription(
             Odometry,
@@ -64,17 +71,23 @@ class TurnServer(Node):
     def _cancel_callback(self, goal_handle):
         self.get_logger().info('Cancelling turn')
         return CancelResponse.ACCEPT
+    
+    """
+    Method controlling the movement of the robot when turning
+    Using an object of RobotTurn to calculate the velocity based on the degree value
+     
+    """
 
     def _execute_callback(self, goal_handle):
         self.get_logger().info('Executing turn')
-        mover = RobotTurn(self._last_pose_theta, goal_handle.request.target_velocity)
-        vel = mover.turn(self._last_pose_theta) 
+        mover = RobotTurn(self._last_pose_theta, goal_handle.request.target_velocity) #Ceating an instance of RobotTurn
+        vel = mover.turn(self._last_pose_theta) #Calculating the turn velocity once befor entering the loop
         self.get_logger().info("Velocity: {}, {}".format(vel[0], vel[1]))
-        while (goal_handle.is_active and not goal_handle.is_cancel_requested and vel is not None):
-            vel = mover.turn(self._last_pose_theta) 
-            self._publish_velocity(vel)
+        while (goal_handle.is_active and not goal_handle.is_cancel_requested and vel is not None): #active while an velocity is calculated
+            vel = mover.turn(self._last_pose_theta) #Calculating the velocity deping on the current degree value
+            self._publish_velocity(vel) #publishing the velocity
             self._publish_feedback(goal_handle, vel)
-            time.sleep(0.05)
+            time.sleep(0.05) #Working with a frequency of 20Hz
         self._publish_velocity(None)
         return self._determine_action_result(goal_handle, vel)
 
@@ -97,9 +110,14 @@ class TurnServer(Node):
             feedback_msg.current_velocity = velocity_msg
             goal_handle.publish_feedback(feedback_msg)
 
+    """
+    Method to determine result
+    Returns based on the current state of goal_handle
+    """
+
     def _determine_action_result(self, goal_handle, vel):
         result = Turn.Result()
-        if goal_handle.is_active:# and vel == [0.0,0.0]:
+        if goal_handle.is_active:
             self.get_logger().info('Turn succeeded')
             goal_handle.succeed()
             result.result = "Turn_succesfull"

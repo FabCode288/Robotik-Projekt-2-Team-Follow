@@ -16,6 +16,12 @@ from move_server.robot_move import RobotMove
 import signal
 import sys
 
+"""
+Action server to controll movement of a robot which follows a line
+Has subscriptions on the RFID sensor, the distance to the line and the distance to an ArUco Marker ahead
+Publishes movement orders to the robot 
+"""
+
 class MoveServer(Node):
 
     def __init__(self):
@@ -70,6 +76,10 @@ class MoveServer(Node):
         self.get_logger().info('Received goal request')
         return GoalResponse.ACCEPT
     
+    """
+    Returns true when an new RFID-tag is reached 
+    and False for no or the same tag beeing detected
+    """    
     def rfid_changed(self):
         if (self._last_rfid_tag != self._new_rfid_tag and self._last_rfid_tag != "None"): 
             self.get_logger().info('RFID did change')
@@ -89,10 +99,16 @@ class MoveServer(Node):
     def _cancel_callback(self, goal_handle):
         self.get_logger().info('Cancelling move')
         return CancelResponse.ACCEPT
-
+    """
+    Method to controll movement of the robot 
+    Using an object of RobotMove to calculate velocities based on the subscribed data
+    publishing the calculated velocity and sending out feedback in a rate of 20Hz
+    terminates when either vel is None, an new RFID is detected or an ArUco marker is detected
+    Finally publishes an empty velocity to stop the current movement 
+    """
     def _execute_callback(self, goal_handle):
         self.get_logger().info('Executing move')
-        mover = RobotMove()         
+        mover = RobotMove(goal_handle.request.target_velocity[1])         
         vel = mover.follow_line(self._dist_to_line, goal_handle.request.target_velocity[0])       
         while(goal_handle.is_active and not goal_handle.is_cancel_requested and vel is not None 
                 and  self.rfid_changed() == False and self.dist_to_robot == -1.0):
@@ -123,7 +139,11 @@ class MoveServer(Node):
             velocity_msg.linear.x = float(vel[0])
             feedback_msg.current_velocity = velocity_msg
             goal_handle.publish_feedback(feedback_msg)
-
+    """
+    Method to determine result
+    Returns based on the current state of goal_handle and the subscribed data whether the result is
+    aborted, canelled, has detected a robot or reached an RDIF-Tag
+    """
     def _determine_action_result(self, goal_handle):
         result = Move.Result()
         if goal_handle.is_active and self._last_rfid_tag!="None": 

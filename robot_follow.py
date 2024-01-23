@@ -12,8 +12,7 @@ class RobotFollow(RobotMove):
         super().__init__()
     """
     calculates velocity command based on distance to robot ahead and target distance
-    stops when threshold of 0.2m is reached
-    increases or decreases velocity to match target distance
+    increases or decreases linear velocity to match target distance
     angular velocity defined by follow_line()
     """    
     def follow(self, dist_to_robot, dist_to_line):

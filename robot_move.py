@@ -7,12 +7,18 @@ import math
 
 class RobotMove:
 
-    def __init__(self):
+    def __init__(self, max_omega):
         self.last_dist = 0
-        self.max_omega = 0.5
+        self.max_omega = max_omega
         self.kP = 0.0002
         self.kD = 0.0002
         self.step = 0.05    
+
+    """
+    Calculating the angular velocity based on the measured distance to the line
+    intercepts the case of no line detected
+    Increases or decreases angua velocity and intercepts too high velocities
+    """
 
     def follow_line(self, dist_to_line, v):#rechts positiv
         if dist_to_line == 66666:

@@ -23,7 +23,7 @@ class ClientLogic():
                 case "Turn_succesfull":
                     order = "move"
                 case "Follow_succesfull":
-                    order = None
+                    order = None #Would go into evasion if implemented
                 case "Canceled":
                     order = None
             return order    

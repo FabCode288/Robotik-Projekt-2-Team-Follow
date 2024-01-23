@@ -16,6 +16,7 @@ class RobotFollow(RobotMove):
     """
     calculates velocity command based on distance to robot ahead and target distance
     increases or decreases linear velocity to match target distance
+    will slow down and stop when ArUco marker disappears
     angular velocity defined by follow_line()
     """    
     def follow(self, dist_to_robot, dist_to_line):

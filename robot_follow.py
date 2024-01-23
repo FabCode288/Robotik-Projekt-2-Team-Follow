@@ -1,7 +1,10 @@
 import numpy as np
 
 from move_server.robot_move import RobotMove
-
+"""
+Logic unit to controll a robot inside the pipe
+makes sure the robot follows an ArUco marker and heads towards the line
+"""
 class RobotFollow(RobotMove):
 
     def __init__(self, wanted_dist):

@@ -35,17 +35,17 @@ x, y als koordinaten, ableitung von x, y ist x punkt, änderung der orientierung
 
 kalibrierung bei näheren abständen
 
-Setup Bedingungen:
+#Setup Bedingungen:
 
 Brettübergänge müssen fließend sein, Kanten führen zu schlagartigen Richtungsänderungen
 Die Beleuchtung sollte kaltes Licht sein und die Oberflächen möglichst nicht reflektiv.
 
-Startup:
+#Startup:
 
 Um den Roboter zu starten muss zuerst in einem Terminal der turtlebot launch Befehl ausgeführt werden
 und in einem zweiten Terminal ro36_move_control_follow ausgeführt werden.
 
-Abbruch:
+#Abbruch:
 
 In beiden Terminals strg + c
 

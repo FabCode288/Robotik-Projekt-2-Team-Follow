@@ -7,7 +7,11 @@ from ro36_interfaces.action import Move
 from ro36_interfaces.action import Follow
 from ro36_interfaces.action import Turn
 from robot_client.client_logic import ClientLogic
-
+"""
+Master unit to controll which action server is in controll of the robots movement
+sends goals to a specific action server based on the result of the previous server
+starts with move
+"""
 class RobotClient(Node):
     def __init__(self):
         self._last_result = "Start"
@@ -34,7 +38,9 @@ class RobotClient(Node):
             self,
             Turn, 
             'turn')       
-
+"""
+sends goal with the initialised target_velocity to the move action server 
+"""
     def send_goal_move(self):
 
         goal_msg = Move.Goal()
@@ -42,7 +48,10 @@ class RobotClient(Node):
 
         self._action_client_move.wait_for_server()        
         self._send_goal_future_move = self._action_client_move.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
-        self._send_goal_future_move.add_done_callback(self.goal_response_callback)      
+        self._send_goal_future_move.add_done_callback(self.goal_response_callback)  
+"""
+sends goal with the initialised target_distance to the follow action server 
+"""
     
     def send_goal_follow(self):
 
@@ -52,7 +61,9 @@ class RobotClient(Node):
         self._action_client_follow.wait_for_server()
         self._send_goal_future_follow = self._action_client_follow.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
         self._send_goal_future_follow.add_done_callback(self.goal_response_callback)
-    
+"""
+sends goal with the initialised target_velocity to the turn action server 
+"""    
     def send_goal_turn(self):
 
         goal_msg = Turn.Goal()

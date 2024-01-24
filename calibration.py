@@ -65,8 +65,8 @@ class Calibration:
         # verification check
         data = np.load(f"{self.calib_data_path}/calibration.npz")
         cam_matrix = data["camera_matrix"]
-        dist_coef = data["distortion_coefficients"]
-        r_vector = data["rvecs"]# mit distanz zu checken 
+        dist_coef = data["distortion_coefficients"] #no need for them in this file, just for checking
+        r_vector = data["rvecs"]
         t_vector = data["tvecs"]
 
         print("Loaded calibration data successfully")

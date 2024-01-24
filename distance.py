@@ -59,7 +59,7 @@ class ArucoDistancePublisher(Node):
     """
     Method calculating the distance to the robot/aruco marker.
     If an aruco marker is detected the method returns the distance.
-    If no aruco marler is detected the method returns an error value of -1.0 
+    If no aruco marker is detected the method returns an error value of -1.0 
     """
 
     def calculate_distance_to_robot(self, frame):
@@ -77,9 +77,9 @@ class ArucoDistancePublisher(Node):
         
     """
     Method calculating the distance to the white line in pixel for every frame.
-    Depending on the position of the line in the frame the Method returns a positiv or a negative value.
-    If the line is on the left ahnd side if the robot the value is negativ.
-    If the line is on right hand side of the Robot the Value is positiv.
+    Depending on the position of the line in the frame the Method returns a positive or a negative value.
+    If the line is on the left ahnd side if the robot the value is negative.
+    If the line is on right hand side of the Robot the Value is positive.
     If no line is detected the method returns an error value of 66666.
     """
         

@@ -90,6 +90,8 @@ class ArucoDistancePublisher(Node):
 
         # Convert the image into Grayscale
         gray = cv.cvtColor(cropped_image, cv.COLOR_BGR2GRAY)
+        gray = cv2.medianBlur(gray, 5)
+        gray = cv2.GaussianBlur(gray, (7,7), 3)
 
         # Thresholds for the white line
         lower_white = 120
@@ -103,19 +105,11 @@ class ArucoDistancePublisher(Node):
             # Choose the biggest contour
             largest_contour = max(contours, key=cv.contourArea)
 
-        # Draw the largest contour onto a black canvas
-            black = np.zeros_like(mask)
-            cv.drawContours(black, [largest_contour], -1, (255, 255, 255), thickness=cv.FILLED)
-
         # Find the edges of the contour        
-            edges = cv.Canny(black, 20, 700, apertureSize=5)
-
-                    # Dilate the edges
-            kernel = np.ones((3,3), np.uint8)
-            dilated_edges = cv.dilate(edges, kernel, iterations=1)
+            edges = cv.Canny(gray, 20, 700, apertureSize=5)           
 
         # Find lines
-            lines = cv.HoughLines(dilated_edges, 1, np.pi / 180, 190)
+            lines = cv.HoughLines(edges, 1, np.pi / 180, 190)
 
          # Check if line were found, exclude horizontal lines
             linecheck = False

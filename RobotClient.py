@@ -37,10 +37,11 @@ class RobotClient(Node):
         self._action_client_turn = ActionClient(
             self,
             Turn, 
-            'turn')       
-"""
-sends goal with the initialised target_velocity to the move action server 
-"""
+            'turn')     
+            
+    """
+    sends goal with the initialised target_velocity to the move action server 
+    """
     def send_goal_move(self):
 
         goal_msg = Move.Goal()
@@ -49,9 +50,9 @@ sends goal with the initialised target_velocity to the move action server
         self._action_client_move.wait_for_server()        
         self._send_goal_future_move = self._action_client_move.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
         self._send_goal_future_move.add_done_callback(self.goal_response_callback)  
-"""
-sends goal with the initialised target_distance to the follow action server 
-"""
+    """
+    sends goal with the initialised target_distance to the follow action server 
+    """
     
     def send_goal_follow(self):
 
@@ -61,9 +62,9 @@ sends goal with the initialised target_distance to the follow action server
         self._action_client_follow.wait_for_server()
         self._send_goal_future_follow = self._action_client_follow.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
         self._send_goal_future_follow.add_done_callback(self.goal_response_callback)
-"""
-sends goal with the initialised target_velocity to the turn action server 
-"""    
+    """
+    sends goal with the initialised target_velocity to the turn action server 
+    """    
     def send_goal_turn(self):
 
         goal_msg = Turn.Goal()
@@ -72,10 +73,10 @@ sends goal with the initialised target_velocity to the turn action server
         self._action_client_turn.wait_for_server()
         self._send_goal_future_turn = self._action_client_turn.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
         self._send_goal_future_turn.add_done_callback(self.goal_response_callback)  
-"""
-callback function to handel goal response
-triggers result callback function when goal is done
-"""
+    """
+    callback function to handel goal response
+    triggers result callback function when goal is done
+    """
     def goal_response_callback(self, future):        
         goal_handle = future.result()
         
@@ -87,24 +88,24 @@ triggers result callback function when goal is done
 
         self._get_result_future = goal_handle.get_result_async()
         self._get_result_future.add_done_callback(self.get_result_callback)
-"""
-result callback function which prints result into logger
-triggers the goal_trigger method to send out the next goal 
-"""
+    """
+    result callback function which prints result into logger
+    triggers the goal_trigger method to send out the next goal 
+    """
     def get_result_callback(self, future):
         self._last_result = future.result().result.result
         self.goal_trigger(self._last_result)
         self.get_logger().info('Result: ' + self._last_result)   
-"""
-prints the received feedback into the logger
-"""
+    """
+    prints the received feedback into the logger
+    """
     def feedback_callback(self, feedback_msg):
         feedback = feedback_msg.feedback
         self.get_logger().info('Received feedback: {0}'.format(feedback.current_velocity.linear.x) + ', ' + format(feedback.current_velocity.angular.z))
-"""
-method which sends out the next goal to an action server
-the next action type is calculated by the client_logic unit 
-"""
+    """
+    method which sends out the next goal to an action server
+    the next action type is calculated by the client_logic unit 
+    """
     def goal_trigger(self,result):
         order = self.client_logic.get_next_client_order(result)
         match order:
@@ -123,10 +124,12 @@ def main(args=None):
     client_node = RobotClient() 
     try:        
         client_node.goal_trigger("Start")        
-        rclpy.spin(client_node)                  
-    finally:
-        client_node.destroy_node()   
-        rclpy.shutdown()
+        rclpy.spin(client_node)    
+    except KeyboardInterrupt:
+        pass
+    client_node.destroy_node()
+    rclpy.try_shutdown()
+
 
 if __name__ == '__main__':
     main()

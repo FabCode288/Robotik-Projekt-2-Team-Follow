@@ -169,14 +169,15 @@ class MoveServer(Node):
 
 def main():
     rclpy.init()
+    move_server = MoveServer()
     try:
         robot_mover_executor = MultiThreadedExecutor(4)
-        move_server = MoveServer()
         rclpy.spin(node=move_server, executor=robot_mover_executor)
 
-    finally:
-        move_server.destroy_node()
-        rclpy.shutdown()
+    except KeyboardInterrupt:
+        move_server._publish_velocity(None)
+    move_server.destroy_node()
+    rclpy.try_shutdown()
 
 if __name__ == '__main__':
     main()

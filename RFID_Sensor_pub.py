@@ -36,9 +36,12 @@ class Minimal_RFID_Publisher(Node):
 def main(args=None):
     rclpy.init(args=args)
     minimal_publisher = Minimal_RFID_Publisher()
-    rclpy.spin(minimal_publisher)
+    try:
+        rclpy.spin(minimal_publisher)
+    except KeyboardInterrupt:
+        pass
     minimal_publisher.destroy_node()
-    rclpy.shutdown()
+    rclpy.try_shutdown()
 
 if __name__ == '__main__':
     main()

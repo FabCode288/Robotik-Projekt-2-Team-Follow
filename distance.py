@@ -143,7 +143,10 @@ class ArucoDistancePublisher(Node):
 def main(args=None):
     rclpy.init(args=args)
     aruco_distance_publisher = ArucoDistancePublisher()
-    rclpy.spin(aruco_distance_publisher)
+    try:
+        rclpy.spin(aruco_distance_publisher)
+    except KeyboardInterrupt:
+        pass
     aruco_distance_publisher.destroy_node()
     rclpy.shutdown()
 

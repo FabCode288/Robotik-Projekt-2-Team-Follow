@@ -139,9 +139,10 @@ def main():
     turn_server = TurnServer()
     try:
         rclpy.spin(node=turn_server, executor=robot_mover_executor)
-    finally:
-        turn_server.destroy_node()
-        rclpy.shutdown()
+    except KeyboardInterrupt:
+        turn_server._publish_velocity(None)
+    turn_server.destroy_node()
+    rclpy.try_shutdown()
 
 if __name__ == '__main__':
     main()

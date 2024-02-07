@@ -73,13 +73,13 @@ class FollowServer(Node):
     def _cancel_callback(self, goal_handle):
         self.get_logger().info('Cancelling follow')
         return CancelResponse.ACCEPT
-"""
-Method to controll movement of the robot
-uses an instance of RobotFollow to calculate movement command 
-increases a counter for every time there was no aruco marker detected 
-terminates when there was no aruco marker detected for 2 seconds
-publishes zero velocity to stop movement at the end 
-"""
+    """
+    Method to controll movement of the robot
+    uses an instance of RobotFollow to calculate movement command 
+    increases a counter for every time there was no aruco marker detected 
+    terminates when there was no aruco marker detected for 2 seconds
+    publishes zero velocity to stop movement at the end 
+    """
     def _execute_callback(self, goal_handle):
         self.get_logger().info('Executing follow')
         mover = RobotFollow(goal_handle.request.target_distance)
@@ -116,10 +116,10 @@ publishes zero velocity to stop movement at the end
             velocity_msg.linear.x = float(vel[0]) 
             feedback_msg.current_velocity = velocity_msg
             goal_handle.publish_feedback(feedback_msg)
-"""
-Method to determine and return result
-is succesfull when when there was no aruco marker detected for at least 2 seconds 
-"""
+    """
+    Method to determine and return result
+    is succesfull when when there was no aruco marker detected for at least 2 seconds 
+    """
     def _determine_action_result(self, goal_handle):
         result = Follow.Result()
         if goal_handle.is_active and self.i >= 40:
@@ -144,9 +144,10 @@ def main():
     follow_server = FollowServer()
     try:
         rclpy.spin(node=follow_server, executor=robot_mover_executor)
-    finally:
-        follow_server.destroy_node()
-        rclpy.shutdown()
+    except KeyboardInterrupt:
+        follow_server._publish_velocity(None)
+    follow_server.destroy_node()
+    rclpy.try_shutdown()
 
 if __name__ == '__main__':
     main()

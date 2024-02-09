@@ -41,7 +41,7 @@ def test_follow_no_line():
 """
 Given a new RobotMove with v = 0.1 
 When the method follow_line is called with dist to line = 60
-Then the method returns omega > 0
+Then the method returns omega < 0
 """
 def test_follow_line_minor_adjustment():
     robot = RobotMove(0.5)
@@ -54,7 +54,7 @@ def test_follow_line_minor_adjustment():
 """
 Given a new RobotMove with v = 0.1
 When the method follow_line is called with dist to line = -60
-Then the method returns omega < 0
+Then the method returns omega > 0
 """
 def test_follow_line_negative_distance():
     robot = RobotMove(0.5)
@@ -67,7 +67,7 @@ def test_follow_line_negative_distance():
 """
 Given a new RobotMove with v = 0.1 and last dist = 450
 When the method follow_line is called with dist to line = 500
-Then the method returns omega == 0.5
+Then the method returns omega == -0.5
 """
 def test_follow_line_major_adjustment_towards_line():
     robot = RobotMove(0.5)
@@ -81,7 +81,7 @@ def test_follow_line_major_adjustment_towards_line():
 """
 Given a new RobotMove with v = 0.1 and last dist = -450
 When the method follow_line is called with dist to line = -500
-Then the method returns omega == -0.5
+Then the method returns omega == 0.5
 """
 def test_follow_line_negativ_major_adjustment_towards_line():
     robot = RobotMove(0.5)
@@ -95,7 +95,7 @@ def test_follow_line_negativ_major_adjustment_towards_line():
 """
 Given a new RobotMove with v = 0.1 and last dist = 100
 When the method follow_line is called with dist to line = 80
-Then the method returns omega < 0
+Then the method returns omega > 0
 """
 def test_follow_line_adjustment_on_approach():
     robot = RobotMove(0.5)
@@ -109,7 +109,7 @@ def test_follow_line_adjustment_on_approach():
 """
 Given a new RobotMove with v = 0.1 and last dist = -100
 When the method follow_line is called with dist to line = -80
-Then the method returns omega > 0
+Then the method returns omega < 0
 """
 def test_follow_line_adjustment_on_approach_negativ():
     robot = RobotMove(0.5)

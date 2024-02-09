@@ -148,7 +148,7 @@ class MoveServer(Node):
     """
     def _determine_action_result(self, goal_handle):
         result = Move.Result()
-        if goal_handle.is_active and self._last_rfid_tag!="None": 
+        if goal_handle.is_active and self._last_rfid_tag!="None" and self._dist_to_robot == -1.0: 
             self.get_logger().info('Move succeeded')
             self.did_RFID_change=False
             goal_handle.succeed()

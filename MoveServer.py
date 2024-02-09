@@ -29,7 +29,8 @@ class MoveServer(Node):
         self._last_rfid_tag = "None"
         self._new_rfid_tag = "None"
         self._dist_to_line = 66666
-        self.dist_to_robot = -1.0
+        self._dist_to_robot = -1.0
+        self._time_stamp = 0
 
         self.rfid_sub = self.create_subscription(
             String,
@@ -67,10 +68,11 @@ class MoveServer(Node):
         self._last_rfid_tag = msg.data   
        
     def _line_dist_callback(self, msg):
-        self._dist_to_line = msg.data   
+        self._dist_to_line = msg.data[0]  
+        self._time_stamp = msg.data[1]
 
     def _robot_dist_callback(self, msg):
-        self.dist_to_robot = msg.data
+        self._dist_to_robot = msg.data
 
     def _goal_callback(self, goal_request):
         self.get_logger().info('Received goal request')
@@ -109,10 +111,10 @@ class MoveServer(Node):
     def _execute_callback(self, goal_handle):
         self.get_logger().info('Executing move')
         mover = RobotMove(goal_handle.request.target_velocity[1])         
-        vel = mover.follow_line(self._dist_to_line, goal_handle.request.target_velocity[0])       
+        vel = mover.follow_line(self._dist_to_line, goal_handle.request.target_velocity[0],self._time_stamp)       
         while(goal_handle.is_active and not goal_handle.is_cancel_requested and vel is not None 
-                and  self.rfid_changed() == False and self.dist_to_robot == -1.0):
-            vel = mover.follow_line(self._dist_to_line, goal_handle.request.target_velocity[0])
+                and  self.rfid_changed() == False and self._dist_to_robot == -1.0):
+            vel = mover.follow_line(self._dist_to_line, goal_handle.request.target_velocity[0],self._time_stamp)
             self._publish_velocity(vel)
             self._publish_feedback(goal_handle, vel)
             time.sleep(0.05)
@@ -151,7 +153,7 @@ class MoveServer(Node):
             self.did_RFID_change=False
             goal_handle.succeed()
             result.result = 'RFID_reached'
-        elif goal_handle.is_active and self.dist_to_robot != -1.0:
+        elif goal_handle.is_active and self._dist_to_robot != -1.0:
             self.get_logger().info('Move succeeded')
             goal_handle.succeed()
             result.result = 'Robot_detected'

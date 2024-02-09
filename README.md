@@ -11,11 +11,11 @@ Startup:
 
 Um den Roboter zu starten werden 2 Terminals benötigt.
 
+In beiden muss zuerst der Befehl: 'ssh ubuntu@10.42.0.1' ausgeführt werden und anschließend das Passwort für den TurtleBot eingegeben werden.
+
 Nach Änderung oder bei der ersten Ausführung sollte der colcon build Befehl im Workspace ausgefühert werden:
 1. 'cd ros2_ws_bot'
 2. 'colocn build'
-
-In beiden muss zuerst der Befehl: 'ssh ubuntu@10.42.0.1' ausgeführt werden und anschließend das Passwort für den TurtleBot eingegeben werden.
 
 Im ersten Terminal muss der Befehl: 'ros2 launch turtlebot3_bringup robot.launch.py' ausgeführt werden.
 

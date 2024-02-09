@@ -9,7 +9,7 @@ class RobotFollow(RobotMove):
 
     def __init__(self, wanted_dist):
         self.wanted_dist = wanted_dist
-        self.v = 0.01
+        self.v = 0
         self.last_dist=0
         self.kp2 = 0.005
         super().__init__(0.7)

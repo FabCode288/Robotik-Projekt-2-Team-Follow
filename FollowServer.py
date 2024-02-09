@@ -94,7 +94,7 @@ class FollowServer(Node):
                 self._publish_velocity(vel)
                 self._publish_feedback(goal_handle,vel)
             self.i = 0
-            time.sleep(0.05)       
+            time.sleep(0.1)       
         self._publish_velocity(None)
         return self._determine_action_result(goal_handle)
 

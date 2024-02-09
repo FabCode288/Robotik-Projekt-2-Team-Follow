@@ -34,5 +34,5 @@ class RobotMove:
             
             self.last_dist = dist_to_line
             if abs(omega) > self.max_omega:#zu Hohe Geschwindigkeit abfangen
-                        omega = self.max_omega*math.copysign(1,omega) *-1
+                        omega = math.copysign(self.max_omega,omega)
             return[v, omega] 

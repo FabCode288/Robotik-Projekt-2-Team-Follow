@@ -24,7 +24,10 @@ class RobotMove:
         if dist_to_line == 66666:
             return [v,0.0]
         else:
-            derivative = (dist_to_line - self.last_dist)/(step-self.last_step)
+            if (step!=self.last_step):#avoiding divison by zero
+                derivative = (dist_to_line - self.last_dist)/(step-self.last_step)
+            else:
+                derivative = 0
             self.last_step=step
                                                           
             omega = -1*(dist_to_line*self.kP + derivative*self.kD) 

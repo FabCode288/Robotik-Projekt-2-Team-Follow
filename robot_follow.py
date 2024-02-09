@@ -19,7 +19,7 @@ class RobotFollow(RobotMove):
     will slow down and stop when ArUco marker disappears
     angular velocity defined by follow_line()
     """    
-    def follow(self, dist_to_robot, dist_to_line):
+    def follow(self, dist_to_robot, dist_to_line,step):
         try:
             error = (dist_to_robot-self.wanted_dist) 
            
@@ -32,7 +32,7 @@ class RobotFollow(RobotMove):
             else:
                 self.v=min(self.v,0.1)
 
-            return self.follow_line(dist_to_line, self.v)
+            return self.follow_line(dist_to_line, self.v,step)
         except:
             return None
         

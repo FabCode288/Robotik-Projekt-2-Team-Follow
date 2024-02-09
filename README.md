@@ -32,6 +32,19 @@ Danach kann der Roboter wieder neu gestartet werden.
 
 Um den Roboter Final zu terminierern muss in beiden Terminals Strg + C gedrückt werden und der muss ausgeschaltet werden.
 
+Testen der Logik:
+
+Um die Logik Einheiten zu testen sind folgende Befehle auszuführen. Beachten Sie, dass der Server-Ordner zur entsprechenden Test-Datei passen muss.
+
+1. 'cd ros2_ws_bot'
+2. 'source install/setup.bash'
+3. 'cd src/follow_server'
+   'cd src/move_server'
+   'cd src/turn_server'
+4. 'python3 -m pytest test/test_robot_follow.py
+   'python3 -m pytest test/test_robot_move.py
+   'python3 -m pytest test/test_robot_turn.py
+   
 Einstellungsmöglichkeiten:
 
 Es ist möglich die Fahrgeschwindigkeit (self.target_velocity_linear), Drehgeschwindigkeit (self.target_velocity_angular) und den Abstand zum Folgen (self.target_distance) einfach zu bearbeiten.

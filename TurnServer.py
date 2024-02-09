@@ -87,7 +87,7 @@ class TurnServer(Node):
             vel = mover.turn(self._last_pose_theta) #Calculating the velocity deping on the current degree value
             self._publish_velocity(vel) #publishing the velocity
             self._publish_feedback(goal_handle, vel)
-            time.sleep(0.05) #Working with a frequency of 20Hz
+            time.sleep(0.1) #Working with a frequency of 10Hz
         self._publish_velocity(None)
         return self._determine_action_result(goal_handle, vel)
 

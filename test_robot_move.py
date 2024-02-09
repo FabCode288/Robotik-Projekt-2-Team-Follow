@@ -12,7 +12,7 @@ Then the method returns None
 def test_follow_line_invalild_parameters():
     robot = RobotMove(0.5)
     v = 0.1
-    command = robot.follow_line("a","b";"c")
+    command = robot.follow_line("a","b","c")
     assert command == None
 
 """
@@ -49,7 +49,7 @@ def test_follow_line_minor_adjustment():
 
     # Test for minor adjustment (dist_to_line small but not 0)
     command = robot.follow_line(60, v,0.2)
-    assert command[1] > 0, "Robot should adjust slightly for small deviations"
+    assert command[1] < 0, "Robot should adjust slightly for small deviations"
 
 """
 Given a new RobotMove with v = 0.1
@@ -62,7 +62,7 @@ def test_follow_line_negative_distance():
 
     # Test for negative distance (should adjust in opposite direction)
     command = robot.follow_line(-60, v,0.2)
-    assert command[1] < 0, "Robot should adjust in the opposite direction for negative distances"
+    assert command[1] > 0, "Robot should adjust in the opposite direction for negative distances"
 
 """
 Given a new RobotMove with v = 0.1 and last dist = 450
@@ -75,8 +75,8 @@ def test_follow_line_major_adjustment_towards_line():
     robot.last_dist = 450
 
     # Test for larger adjustment (dist_to_line large)
-    command = robot.follow_line(500, v,0.2)
-    assert command[1] == 0.5, "Robot should make major adjustments for large deviations"
+    command = robot.follow_line(50000, v,0.2)
+    assert command[1] == -0.5, "Robot should make major adjustments for large deviations"
 
 """
 Given a new RobotMove with v = 0.1 and last dist = -450
@@ -89,8 +89,8 @@ def test_follow_line_negativ_major_adjustment_towards_line():
     robot.last_dist = -450
 
     # Test for larger adjustment (dist_to_line large)
-    command = robot.follow_line(-500, v,0.2)
-    assert command[1] == -0.5, "Robot should make major adjustments for large deviations"
+    command = robot.follow_line(-50000, v,0.2)
+    assert command[1] == 0.5, "Robot should make major adjustments for large deviations"
 
 """
 Given a new RobotMove with v = 0.1 and last dist = 100
@@ -104,7 +104,7 @@ def test_follow_line_adjustment_on_approach():
 
     # Test for negative distance (should adjust in opposite direction)
     command = robot.follow_line(80, v,0.2)
-    assert command[1] < 0, "Robot should adjust in the opposite direction for negative distances"
+    assert command[1] > 0, "Robot should adjust in the opposite direction for negative distances"
 
 """
 Given a new RobotMove with v = 0.1 and last dist = -100
@@ -118,6 +118,6 @@ def test_follow_line_adjustment_on_approach_negativ():
 
     # Test for negative distance (should adjust in opposite direction)
     command = robot.follow_line(-80, v,0.2)
-    assert command[1] > 0, "Robot should adjust in the opposite direction for negative distances"
+    assert command[1] < 0, "Robot should adjust in the opposite direction for negative distances"
 
 

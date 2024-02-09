@@ -21,18 +21,21 @@ class RobotMove:
     """
 
     def follow_line(self, dist_to_line, v, step):#rechts positiv
-        if dist_to_line == 66666:
-            return [v,0.0]
-        else:
-            if (step!=self.last_step):#avoiding divison by zero
-                derivative = (dist_to_line - self.last_dist)/(step-self.last_step)
+        try:
+            if dist_to_line == 66666:
+                return [v,0.0]
             else:
-                derivative = 0
-            self.last_step=step
-                                                          
-            omega = -1*(dist_to_line*self.kP + derivative*self.kD) 
-            
-            self.last_dist = dist_to_line
-            if abs(omega) > self.max_omega:#zu Hohe Geschwindigkeit abfangen
-                        omega = math.copysign(self.max_omega,omega)
-            return[v, omega] 
+                if (step!=self.last_step):#avoiding divison by zero
+                    derivative = (dist_to_line - self.last_dist)/(step-self.last_step)
+                else:
+                    derivative = 0
+                self.last_step=step
+                                                            
+                omega = -1*(dist_to_line*self.kP + derivative*self.kD) 
+                
+                self.last_dist = dist_to_line
+                if abs(omega) > self.max_omega:#zu Hohe Geschwindigkeit abfangen
+                            omega = math.copysign(self.max_omega,omega)
+                return[v, omega] 
+        except:
+             return None

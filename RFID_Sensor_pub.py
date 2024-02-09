@@ -13,7 +13,7 @@ class Minimal_RFID_Publisher(Node):
     def __init__(self):
         super().__init__('rfid_publisher')
         self.publisher_ = self.create_publisher(String, 'rfid_topic', 10) #Creating the publisher
-        timer_period = 0.2 #pulishs Data String with 5Hz
+        timer_period = 0.05 #pulishs Data String with 20Hz
         self.timer = self.create_timer(timer_period, self.timer_callback) #Creating the timer for a current frequency
         self.reader = SimpleMFRC522()
 

@@ -12,7 +12,7 @@ class RobotFollow(RobotMove):
         self.v = 0.01
         self.last_dist=0
         self.kp2 = 0.005
-        super().__init__()
+        super().__init__(0.7)
     """
     calculates velocity command based on distance to robot ahead and target distance
     increases or decreases linear velocity to match target distance

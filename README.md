@@ -22,6 +22,7 @@ Im zweiten Terminal:
 4. 'ros2 launch ro36_move_control_follow.py
 
 Abbruch:
+
 Um den Roboter anzuhalten muss in dem Terminal in dem der Launch-Befehl des Systems ausgeführt wurde ein KeyboardInterrupt (Strg + C) durchgeführt werden.
 Danach kann der Roboter wieder neu gestartet werden.
 

@@ -10,8 +10,8 @@ class RobotMove:
     def __init__(self, max_omega):
         self.last_dist = 0
         self.max_omega = max_omega
-        self.kP = 0.0002
-        self.kD = 0.0002
+        self.kP = 0.00015
+        self.kD = 0.0005
         self.last_step = 0
 
     """

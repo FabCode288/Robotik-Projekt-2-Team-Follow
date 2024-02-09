@@ -25,7 +25,7 @@ def test_follow_line_straight_path():
     v = 0.1  
 
     # Test for straight path (dist_to_line close to 0)
-    command = robot.follow_line(0, v, -0.05)
+    command = robot.follow_line(0, v, -0.2)
     assert command[1] == 0, "Robot should move straight when on the line"
 """
 Given a new RobotMove with v = 0.1 

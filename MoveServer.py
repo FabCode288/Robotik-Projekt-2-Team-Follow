@@ -117,7 +117,7 @@ class MoveServer(Node):
             vel = mover.follow_line(self._dist_to_line, goal_handle.request.target_velocity[0],self._time_stamp)
             self._publish_velocity(vel)
             self._publish_feedback(goal_handle, vel)
-            time.sleep(0.05)
+            time.sleep(0.1)
             
         self._publish_velocity(None)
         return self._determine_action_result(goal_handle)

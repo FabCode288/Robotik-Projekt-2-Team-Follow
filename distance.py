@@ -23,7 +23,7 @@ class ArucoDistancePublisher(Node):
         self.camera_matrix = None 
         self.distortion_coefficients = None 
 
-        timer_period = 0.2  # Publishes data with a frequency of 5Hz
+        timer_period = 0.05  # Publishes data with a frequency of 20Hz
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
         # Load calibration data and set camera matrix and distortion coefficients

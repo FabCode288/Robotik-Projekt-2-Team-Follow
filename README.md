@@ -26,7 +26,7 @@ Abbruch:
 Um den Roboter anzuhalten muss in dem Terminal in dem der Launch-Befehl des Systems ausgeführt wurde ein KeyboardInterrupt (Strg + C) durchgeführt werden.
 Danach kann der Roboter wieder neu gestartet werden.
 
-Um den Roboter Final zu terminierern muss in beiden TErminals Strg + C gedrückt werden und der muss ausgeschaltet werden.
+Um den Roboter Final zu terminierern muss in beiden Terminals Strg + C gedrückt werden und der muss ausgeschaltet werden.
 
 Einstellungsmöglichkeiten:
 

@@ -12,7 +12,7 @@ class RobotMove:
         self.max_omega = max_omega
         self.kP = 0.0002
         self.kD = 0.0002
-        self.step = 0.05    
+        self.last_step = 0
 
     """
     Calculating the angular velocity based on the measured distance to the line
@@ -20,11 +20,13 @@ class RobotMove:
     Increases or decreases angua velocity and intercepts too high velocities
     """
 
-    def follow_line(self, dist_to_line, v):#rechts positiv
+    def follow_line(self, dist_to_line, v, step):#rechts positiv
         if dist_to_line == 66666:
             return [v,0.0]
         else:
-            derivative = (dist_to_line - self.last_dist)/self.step
+            derivative = (dist_to_line - self.last_dist)/(step-self.last_step
+            self.last_step=step
+                                                          
             omega = -1*(dist_to_line*self.kP + derivative*self.kD) 
             
             self.last_dist = dist_to_line

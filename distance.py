@@ -2,6 +2,7 @@ import rclpy
 import cv2 as cv
 import numpy as np
 import os
+import time
 
 from rclpy.node import Node
 from std_msgs.msg import Float32
@@ -44,6 +45,7 @@ class ArucoDistancePublisher(Node):
 
     def timer_callback(self):
         ret, frame = self.cap.read()  # Capture frame from the camera
+        time_stamp = time.time()
         if not ret:
             self.get_logger().warning('No frame received.')
             return
@@ -54,12 +56,12 @@ class ArucoDistancePublisher(Node):
 
         distance_line = self.calculate_distance_to_line(frame)  #Publishs the Distance to the Line, if a line is detected
         if distance_line is not None:
-            self.publish_distance_line(distance_line)
+            self.publish_distance_line(distance_line, time_stamp)
 
     """
     Method calculating the distance to the robot/aruco marker.
     If an aruco marker is detected the method returns the distance.
-    If no aruco marker is detected the method returns an error value of -1.0 
+    If no aruco marler is detected the method returns an error value of -1.0 
     """
 
     def calculate_distance_to_robot(self, frame):
@@ -77,9 +79,9 @@ class ArucoDistancePublisher(Node):
         
     """
     Method calculating the distance to the white line in pixel for every frame.
-    Depending on the position of the line in the frame the Method returns a positive or a negative value.
-    If the line is on the left ahnd side if the robot the value is negative.
-    If the line is on right hand side of the Robot the Value is positive.
+    Depending on the position of the line in the frame the Method returns a positiv or a negative value.
+    If the line is on the left ahnd side if the robot the value is negativ.
+    If the line is on right hand side of the robot the value is positiv.
     If no line is detected the method returns an error value of 66666.
     """
         
@@ -90,8 +92,8 @@ class ArucoDistancePublisher(Node):
 
         # Convert the image into Grayscale
         gray = cv.cvtColor(cropped_image, cv.COLOR_BGR2GRAY)
-        gray = cv2.medianBlur(gray, 5)
-        gray = cv2.GaussianBlur(gray, (7,7), 3)
+        gray = cv.medianBlur(gray, 5)
+        gray = cv.GaussianBlur(gray, (7,7), 3)
 
         # Thresholds for the white line
         lower_white = 120
@@ -127,18 +129,18 @@ class ArucoDistancePublisher(Node):
         else:
             return 66666
 
-
     def publish_distance_robot(self, distance_robot):
         msg_robot = Float32()
         msg_robot.data = float(distance_robot)
         self.publisher_distance_to_robot.publish(msg_robot)
         self.get_logger().info('Publishing distance to robot: "%s"' % msg_robot.data)
         
-    def publish_distance_line(self, distance_line):
+    def publish_distance_line(self, distance_line, time_stamp):
         msg_line = Float32()
-        msg_line.data = float(distance_line)
+        msg_line.data = [float(distance_line), float(time_stamp)]
         self.publisher_distance_to_line.publish(msg_line)
         self.get_logger().info('Publishing distance to line: "%s"' % msg_line.data)
+
 
 def main(args=None):
     rclpy.init(args=args)

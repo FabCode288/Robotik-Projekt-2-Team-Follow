@@ -17,6 +17,7 @@ Action server to controll movement of a robot following a robot and a line
 has subscriptions to dist_to_line publisher and auco_distance publisher
 publishes movement order
 """
+
 class FollowServer(Node):
 
     def __init__(self):
@@ -25,6 +26,7 @@ class FollowServer(Node):
         self.dist_to_robot = 0
         self.i = 0
         self._goal_handle = None
+        self._time_stamp = 0
 
         self.robot_dist_sub = self.create_subscription(
             Float32,
@@ -56,7 +58,9 @@ class FollowServer(Node):
         self.dist_to_robot = msg.data
 
     def _line_dist_callback(self, msg):
-        self.dist_to_line = msg.data
+        self.dist_to_line = msg.data[0]
+        self._time_stamp = msg.data[1]
+
 
     def _goal_callback(self, goal_request):
         self.get_logger().info('Received goal request with target distance')
@@ -73,6 +77,7 @@ class FollowServer(Node):
     def _cancel_callback(self, goal_handle):
         self.get_logger().info('Cancelling follow')
         return CancelResponse.ACCEPT
+    
     """
     Method to controll movement of the robot
     uses an instance of RobotFollow to calculate movement command 
@@ -80,14 +85,15 @@ class FollowServer(Node):
     terminates when there was no aruco marker detected for 2 seconds
     publishes zero velocity to stop movement at the end 
     """
+
     def _execute_callback(self, goal_handle):
         self.get_logger().info('Executing follow')
         mover = RobotFollow(goal_handle.request.target_distance)
         self.get_logger().info('Target Distance: ' + str(goal_handle.request.target_distance))
-        vel = mover.follow(self.dist_to_robot, self.dist_to_line) 
+        vel = mover.follow(self.dist_to_robot, self.dist_to_line, self._time_stamp) 
         self.i = 0
-        while(goal_handle.is_active and not goal_handle.is_cancel_requested and self.i < 40):
-            vel = mover.follow(self.dist_to_robot, self.dist_to_line) 
+        while(goal_handle.is_active and not goal_handle.is_cancel_requested and self.i < 20):
+            vel = mover.follow(self.dist_to_robot, self.dist_to_line, self._time_stamp) 
             if self.dist_to_robot == -1.0:
                self.i += 1
             else:
@@ -116,6 +122,7 @@ class FollowServer(Node):
             velocity_msg.linear.x = float(vel[0]) 
             feedback_msg.current_velocity = velocity_msg
             goal_handle.publish_feedback(feedback_msg)
+
     """
     Method to determine and return result
     is succesfull when when there was no aruco marker detected for at least 2 seconds 

@@ -1,38 +1,38 @@
-import numpy as np
-
 from move_server.robot_move import RobotMove
-"""
-Logic unit to controll a robot inside the pipe
-makes sure the robot follows an ArUco marker and heads towards the line
-"""
+
 class RobotFollow(RobotMove):
 
     def __init__(self, wanted_dist):
+        if(wanted_dist > 1): #catching too high distances
+            wanted_dist = 1
+        if(wanted_dist < 0.2):#catching too low distances
+            wanted_dist = 0.2
         self.wanted_dist = wanted_dist
-        self.v = 0
-        self.last_dist=0
-        self.kp2 = 0.005
+        self.v = 0.01
+        self.last_dist = 0
+        self.kp = 0.005
+
         super().__init__(0.7)
     """
     calculates velocity command based on distance to robot ahead and target distance
-    increases or decreases linear velocity to match target distance
-    will slow down and stop when ArUco marker disappears
+    stops when threshold of 0.2m is reached
+    increases or decreases velocity to match target distance
     angular velocity defined by follow_line()
+    Using a PT1 system with a simple P regulating algorithm
     """    
-    def follow(self, dist_to_robot, dist_to_line,step):
+    def follow(self, dist_to_robot, dist_to_line, step):
         try:
-            error = (dist_to_robot-self.wanted_dist) 
-           
-            res = error * self.kp2            
-            
-            self.v += res
-            if (self.v<=0):
-                self.v=0
-                return [0,0]
-            else:
-                self.v=min(self.v,0.1)
+            dist_error = (dist_to_robot-self.wanted_dist) #Distance difference
+            p = dist_error * self.kp       
 
-            return self.follow_line(dist_to_line, self.v,step)
+            self.v += p #accelerate and brake
+            if (self.v <= 0): #exclude negative values ​​so as not to drive backwards
+                self.v = 0
+                return [0, 0]
+            else:
+                self.v = min(self.v, 0.1) #set a maximal velocity
+
+            return self.follow_line(dist_to_line, self.v, step) #follow line from robot_move
         except:
             return None
         
